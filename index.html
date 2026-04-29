@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <input type="text" class="search-input" placeholder="search by name" />
+        <select class="filter-room">
+            <option value="">All rooms</option>
+        </select>
+        <form class="form">
+            <input type="text" name="name" class="input" />
+            <select name="room" class="select-room"></select>
+            <select name="status">
+                <option value="active">active</option>
+                <option value="inactive">inactive</option>
+            </select>
+            <button class="button">Add</button>
+            <button type="button" class="cancel-button" hidden>Cancel</button>
+        </form>
+        <div class="list"></div>
+        <script src="script.js"></script>
+    </body>
+</html>
