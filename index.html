@@ -3,25 +3,82 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Document</title>
+        <title>Inventory manage system</title>
         <link rel="stylesheet" href="style.css" />
     </head>
     <body>
-        <input type="text" class="search-input" placeholder="search by name" />
-        <select class="filter-room">
-            <option value="">All rooms</option>
-        </select>
-        <form class="form">
-            <input type="text" name="name" class="input" />
-            <select name="room" class="select-room"></select>
-            <select name="status">
-                <option value="active">active</option>
-                <option value="inactive">inactive</option>
-            </select>
-            <button class="button">Add</button>
-            <button type="button" class="cancel-button" hidden>Cancel</button>
-        </form>
-        <div class="list"></div>
+        <header class="header">
+            <h1>Inventory App</h1>
+            <p>Equipment manage system</p>
+        </header>
+        <main class="app">
+            <section class="panel">
+                <h2>Add equipment</h2>
+                <form class="form">
+                    <div class="form-field">
+                        <label for="name">Equipment name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            class="input"
+                            placeholder="Printer"
+                            id="name"
+                        />
+                    </div>
+                    <div class="form-field">
+                        <label for="room">Room</label>
+                        <select
+                            name="room"
+                            id="room"
+                            class="select-room"
+                        ></select>
+                    </div>
+                    <div class="form-field">
+                        <label for="status">Status</label>
+                        <select name="status" id="status">
+                            <option value="active">active</option>
+                            <option value="inactive">inactive</option>
+                        </select>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary">
+                            Add
+                        </button>
+                        <button
+                            type="button"
+                            class="button button-secondary cancel-button"
+                            hidden
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </section>
+            <section class="panel">
+                <h2>Filters</h2>
+                <div class="filters">
+                    <div class="form-field">
+                        <label for="search">Search</label>
+                        <input
+                            type="text"
+                            class="search-input"
+                            id="search"
+                            placeholder="search by name"
+                        />
+                    </div>
+                    <div class="form-field">
+                        <label for="filter-room">Room</label>
+                        <select class="filter-room" id="filter-room">
+                            <option value="">All rooms</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+            <section class="equipment-section">
+                <h2>Equipment list</h2>
+                <div class="list"></div>
+            </section>
+        </main>
         <script src="script.js"></script>
     </body>
 </html>

@@ -141,11 +141,18 @@ function startEditing(equipment) {
 
 function createEquipmentNode(equipment) {
   const equipmentNode = document.createElement("div");
-  equipmentNode.className = "equipment";
+  equipmentNode.className = "equipment-card";
+
+  const equipmentInfo = document.createElement("div");
+  equipmentInfo.className = "equipment-info";
+
+  const equipmentActions = document.createElement("div");
+  equipmentActions.className = "equipment-actions";
 
   const equipmentName = document.createElement("h3");
   const equipmentRoom = document.createElement("p");
   const equipmentStatus = document.createElement("p");
+
   const deleteButton = document.createElement("button");
   const editButton = document.createElement("button");
 
@@ -154,20 +161,19 @@ function createEquipmentNode(equipment) {
   equipmentStatus.textContent = `Status: ${equipment.status}`;
 
   deleteButton.textContent = "Delete";
+  deleteButton.className = "button button-danger";
   deleteButton.dataset.action = "delete";
   deleteButton.dataset.id = equipment.id;
 
   editButton.textContent = "Edit";
+  editButton.className = "button button-secondary";
   editButton.dataset.action = "edit";
   editButton.dataset.id = equipment.id;
 
-  equipmentNode.append(
-    equipmentName,
-    equipmentRoom,
-    equipmentStatus,
-    deleteButton,
-    editButton,
-  );
+  equipmentInfo.append(equipmentName, equipmentRoom, equipmentStatus);
+  equipmentActions.append(editButton, deleteButton);
+
+  equipmentNode.append(equipmentInfo, equipmentActions);
 
   return equipmentNode;
 }
