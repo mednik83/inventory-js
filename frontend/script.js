@@ -3,6 +3,7 @@
 let searchQuery = "";
 let selectedRoom = "";
 let editingId = null;
+let equipmentList = [];
 
 // data constants
 const rooms = ["1", "2", "3", "4", "5"];
@@ -17,127 +18,116 @@ const equipmentListNode = document.querySelector(".list");
 const submitButton = form.querySelector("button");
 const cancelButton = document.querySelector(".cancel-button");
 
-// Equipment storage
-const storage = {
-  localStorageKey: "equipmentList",
-  equipmentList: [],
-  getEquipmentList() {
-    return this.equipmentList;
+const API_URL = "http://localhost:8010/equipments";
+
+// API fetch
+const equipmentApi = {
+  async fetchEquipments() {
+    const response = await fetch(API_URL);
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch equipments");
+    }
+
+    return await response.json();
   },
-  getEquipment(id) {
-    return this.equipmentList.find((eq) => eq.id === id);
-  },
-  addEquipment(equipment) {
-    this.equipmentList.push(equipment);
-    this.saveToLocalStorage();
-  },
-  deleteEquipment(id) {
-    this.equipmentList = this.equipmentList.filter((eq) => eq.id !== id);
-    this.saveToLocalStorage();
-  },
-  saveToLocalStorage() {
-    localStorage.setItem(
-      this.localStorageKey,
-      JSON.stringify(this.equipmentList),
-    );
-  },
-  updateEquipment(equipment) {
-    this.equipmentList = this.equipmentList.map((eq) => {
-      return eq.id === equipment.id ? equipment : eq;
+
+  async createEquipment(equipment) {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(equipment),
     });
-    this.saveToLocalStorage();
+
+    if (!response.ok) {
+      throw new Error("Failed to create equipment");
+    }
+
+    return await response.json();
   },
-  loadFromLocalStorage() {
-    try {
-      const equipments = JSON.parse(localStorage.getItem(this.localStorageKey));
-      this.equipmentList = Array.isArray(equipments) ? equipments : [];
-    } catch {
-      this.equipmentList = [];
+
+  async editEquipment(id, equipment) {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(equipment),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to edit equipment");
+    }
+
+    return await response.json();
+  },
+
+  async removeEquipment(id) {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete equipment");
     }
   },
 };
-storage.loadFromLocalStorage();
-
-// create form select
-rooms.forEach((room) => {
-  const formOption = document.createElement("option");
-  formOption.value = room;
-  formOption.textContent = room;
-  selectRoom.appendChild(formOption);
-
-  const filterOption = document.createElement("option");
-  filterOption.value = room;
-  filterOption.textContent = room;
-  filterRoom.appendChild(filterOption);
-});
-
-// equipment crud
-function addEquipment(name, room, status) {
-  const equipment = {
-    id: Date.now(),
-    name,
-    room,
-    status,
-  };
-
-  storage.addEquipment(equipment);
-  renderEquipmentList();
-}
-
-function updateEquipment(id, name, room, status) {
-  const equipment = {
-    id,
-    name,
-    room,
-    status,
-  };
-  storage.updateEquipment(equipment);
-  renderEquipmentList();
-}
-
-function deleteEquipment(id) {
-  storage.deleteEquipment(id);
-
-  if (editingId === id) {
-    resetFormState();
-  }
-  renderEquipmentList();
-}
-
-function getEquipmentById(id) {
-  return storage.getEquipment(id);
-}
 
 // utils
-function resetFormState() {
-  editingId = null;
-  cancelButton.hidden = true;
-  submitButton.textContent = "Add";
-  form.reset();
-}
+const UTILS = {
+  resetFormState() {
+    editingId = null;
+    cancelButton.hidden = true;
+    submitButton.textContent = "Add";
+    form.reset();
+  },
 
-function getFilteredEquipmentList() {
-  return storage.getEquipmentList().filter((eq) => {
-    const matchesName = eq.name.toLowerCase().includes(searchQuery);
-    const matchesRoom = selectedRoom === "" || eq.room === selectedRoom;
+  getFilteredEquipmentList() {
+    return equipmentList.filter((eq) => {
+      const matchesName = eq.name.toLowerCase().includes(searchQuery);
+      const matchesRoom = selectedRoom === "" || eq.room === selectedRoom;
 
-    return matchesName && matchesRoom;
-  });
-}
+      return matchesName && matchesRoom;
+    });
+  },
 
-function startEditing(equipment) {
-  if (!equipment) return;
+  startEditing(equipment) {
+    if (!equipment) return;
 
-  cancelButton.hidden = false;
+    cancelButton.hidden = false;
 
-  editingId = equipment.id;
+    editingId = equipment.id;
 
-  form.elements.name.value = equipment.name;
-  form.elements.room.value = equipment.room;
-  form.elements.status.value = equipment.status;
+    form.elements.name.value = equipment.name;
+    form.elements.room.value = equipment.room;
+    form.elements.status.value = equipment.status;
 
-  submitButton.textContent = "Save";
-}
+    submitButton.textContent = "Save";
+  },
+};
+
+const equipmentService = {
+  async create(name, room, status) {
+    await equipmentApi.createEquipment({ name, room, status });
+    await loadEquipments();
+  },
+  async update(id, name, room, status) {
+    await equipmentApi.editEquipment(id, { name, room, status });
+    await loadEquipments();
+  },
+  async delete(id) {
+    await equipmentApi.removeEquipment(id);
+    if (editingId === id) {
+      UTILS.resetFormState();
+    }
+    await loadEquipments();
+  },
+  getById(id) {
+    return equipmentList.find((eq) => eq.id === id);
+  },
+};
 
 function createEquipmentNode(equipment) {
   const equipmentNode = document.createElement("div");
@@ -181,7 +171,7 @@ function createEquipmentNode(equipment) {
 // render equipment list
 function renderEquipmentList() {
   equipmentListNode.innerHTML = "";
-  const equipments = getFilteredEquipmentList();
+  const equipments = UTILS.getFilteredEquipmentList();
 
   if (equipments.length === 0) {
     equipmentListNode.textContent = "No equipment found";
@@ -194,7 +184,7 @@ function renderEquipmentList() {
 }
 
 // listener for form equipment
-form.addEventListener("submit", (event) => {
+form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const data = new FormData(form);
@@ -213,30 +203,42 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
-  if (editingId !== null) {
-    updateEquipment(editingId, name, room, status);
-    resetFormState();
-  } else {
-    addEquipment(name, room, status);
-    resetFormState();
+  try {
+    if (editingId !== null) {
+      await equipmentService.update(editingId, name, room, status);
+    } else {
+      await equipmentService.create(name, room, status);
+    }
+    UTILS.resetFormState();
+  } catch (err) {
+    console.error(err);
+    alert("Ошибка при сохранении данных");
   }
 });
 
-equipmentListNode.addEventListener("click", (e) => {
+equipmentListNode.addEventListener("click", async (e) => {
   const button = e.target.closest("button");
 
   if (!button) return;
 
   if (button.dataset.action === "delete") {
-    deleteEquipment(Number(button.dataset.id));
+    try {
+      await equipmentService.delete(Number(button.dataset.id));
+    } catch (err) {
+      console.error(err);
+      alert("Ошибка при удалении оборудования");
+    }
     return;
   }
 
   if (button.dataset.action === "edit") {
     const id = Number(button.dataset.id);
-    const equipment = getEquipmentById(id);
-
-    startEditing(equipment);
+    const equipment = equipmentService.getById(id);
+    if (!equipment) {
+      alert("Оборудование не найдено");
+      return;
+    }
+    UTILS.startEditing(equipment);
     return;
   }
 });
@@ -254,8 +256,31 @@ filterRoom.addEventListener("change", (e) => {
 });
 
 cancelButton.addEventListener("click", () => {
-  resetFormState();
+  UTILS.resetFormState();
 });
 
 // init
-renderEquipmentList();
+rooms.forEach((room) => {
+  const formOption = document.createElement("option");
+  formOption.value = room;
+  formOption.textContent = room;
+  selectRoom.appendChild(formOption);
+
+  const filterOption = document.createElement("option");
+  filterOption.value = room;
+  filterOption.textContent = room;
+  filterRoom.appendChild(filterOption);
+});
+
+async function loadEquipments() {
+  try {
+    equipmentList = await equipmentApi.fetchEquipments();
+    renderEquipmentList();
+  } catch (err) {
+    console.error(err);
+    equipmentList = [];
+    equipmentListNode.textContent = "Failed to load equipment";
+  }
+}
+
+loadEquipments();
