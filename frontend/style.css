@@ -80,11 +80,11 @@ select {
 }
 
 input:focus,
-selectfocus {
+select:focus {
     border-color: #2563eb;
 }
 
-.form-action {
+.form-actions {
     display: flex;
     gap: 10px;
 }
@@ -92,7 +92,7 @@ selectfocus {
 .button {
     padding: 10px 14px;
     border: none;
-    border-radius: 10xp;
+    border-radius: 10px;
     font-size: 15px;
     cursor: pointer;
 }

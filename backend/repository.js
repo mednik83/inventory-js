@@ -54,10 +54,6 @@ class EquipmentRepository {
       )
       .run(equipment.name, equipment.room, equipment.status, equipment.id);
 
-    if (result.changes === 0) {
-      throw new Error("Equipment not found");
-    }
-
     return result;
   }
 

@@ -11,6 +11,9 @@ class EquipmentController {
 
       res.json(equipment);
     } catch (error) {
+      if (error.message === "Equipment not found") {
+        return res.status(404).json({ message: error.message });
+      }
       res.status(400).json({ message: error.message });
     }
   }
@@ -48,7 +51,7 @@ class EquipmentController {
       const deleted = equipmentService.delete(req.params.id);
 
       if (!deleted) {
-        return req.status(404).json({ message: "Equipment not found" });
+        return res.status(404).json({ message: "Equipment not found" });
       }
 
       res.status(204).send();
