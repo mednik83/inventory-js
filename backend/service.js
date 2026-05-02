@@ -2,7 +2,7 @@ import { equipmentRepository } from "./repository.js";
 
 function validateId(id) {
   const equipmentId = Number(id);
-  if (Number(isNaN(equipmentId))) {
+  if (Number.isNaN(equipmentId)) {
     throw new Error("Invalid ID");
   }
   return equipmentId;
@@ -28,7 +28,8 @@ class EquipmentService {
   getById(id) {
     validateId(id);
 
-    const equipment = equipmentRepository.findById(id);
+    const equipmentId = validateId(id);
+    const equipment = equipmentRepository.findById(equipmentId);
 
     if (!equipment) {
       throw new Error("Equipment not found");
