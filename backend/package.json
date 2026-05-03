@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node --env-file=.env server.js",
+    "test": "DB_PATH=./database/inventory.test.sqlite mocha ./tests/*"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,8 @@
     "express": "^5.2.1"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "mocha": "^11.7.5",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2"
   }
 }
