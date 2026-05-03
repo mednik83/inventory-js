@@ -1,10 +1,12 @@
-import { equipmentRepository } from "./repository.js";
+import { equipmentRepository } from "../repositories/repository.js";
 
 function validateId(id) {
   const equipmentId = Number(id);
-  if (Number.isNaN(equipmentId)) {
+
+  if (!Number.isInteger(equipmentId) || equipmentId <= 0) {
     throw new Error("Invalid ID");
   }
+
   return equipmentId;
 }
 
@@ -26,13 +28,11 @@ function validateEquipment(data) {
 
 class EquipmentService {
   getById(id) {
-    validateId(id);
-
     const equipmentId = validateId(id);
     const equipment = equipmentRepository.findById(equipmentId);
 
     if (!equipment) {
-      throw new Error("Equipment not found");
+      return false;
     }
     return equipment;
   }
@@ -64,7 +64,7 @@ class EquipmentService {
     const result = equipmentRepository.update(equipment);
 
     if (result.changes === 0) {
-      throw new Error("Equipment not found");
+      return false;
     }
 
     return equipment;
@@ -76,7 +76,7 @@ class EquipmentService {
     const result = equipmentRepository.deleteById(equipmentId);
 
     if (result.changes === 0) {
-      throw new Error("Equipment not found");
+      return false;
     }
 
     return true;
