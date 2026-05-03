@@ -20,6 +20,16 @@ class RoomRepository {
       )
       .all();
   }
+  findById(id) {
+    return db
+      .prepare(
+        `
+      SELECT * FROM rooms
+      WHERE id = ?
+      `,
+      )
+      .get(id);
+  }
 }
 
 export const roomRepository = new RoomRepository();

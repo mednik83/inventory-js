@@ -2,14 +2,16 @@ import db from "../database/db.js";
 
 class EquipmentRepository {
   create(equipment) {
-    db.prepare(
-      `
-      INSERT INTO equipments (id, name, room_id, status)
-      VALUES (?, ?, ?, ?)
+    const result = db
+      .prepare(
+        `
+      INSERT INTO equipments (name, room_id, status)
+      VALUES (?, ?, ?)
     `,
-    ).run(equipment.id, equipment.name, equipment.room_id, equipment.status);
+      )
+      .run(equipment.name, equipment.room_id, equipment.status);
 
-    return equipment;
+    return this.findById(result.lastInsertRowid);
   }
 
   findById(id) {

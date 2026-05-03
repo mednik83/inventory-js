@@ -1,4 +1,5 @@
 import { equipmentRepository } from "../repositories/equipment.repository.js";
+import { roomService } from "./room.service.js";
 
 function validateId(id) {
   const equipmentId = Number(id);
@@ -12,24 +13,26 @@ function validateId(id) {
 
 function validateEquipment(data) {
   const name = data.name?.trim();
-  const room_id = String(data.room_id)?.trim();
+  const roomIdRaw = data.room_id;
   const status = data.status?.trim();
+
+  if (!name || !status || roomIdRaw === undefined || roomIdRaw === null) {
+    throw new Error("Invalid equipment data");
+  }
 
   if (name.length < 2) {
     throw new Error("The name is too short");
   }
 
-  if (Number.isNaN(+room_id)) {
-    throw new Error("The room number must be a number");
-  }
+  const room_id = Number(roomIdRaw);
 
-  if (!name || !room_id || !status) {
-    throw new Error("Invalid equipment data");
+  if (!Number.isInteger(room_id) || room_id <= 0) {
+    throw new Error("The room number must be a positive integer");
   }
 
   return {
     name,
-    room_id: Number(room_id),
+    room_id,
     status,
   };
 }
@@ -51,6 +54,10 @@ class EquipmentService {
 
   create(data) {
     const validData = validateEquipment(data);
+
+    if (!roomService.getById(validData.room_id)) {
+      return false;
+    }
 
     const equipment = {
       id: Date.now(),

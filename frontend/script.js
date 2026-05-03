@@ -5,6 +5,7 @@ let selectedRoom = "";
 let editingId = null;
 let equipmentList = [];
 let roomList = [];
+let roomsById = new Map();
 
 // nodes constants
 const searchInput = document.querySelector(".search-input");
@@ -160,8 +161,9 @@ function createEquipmentNode(equipment) {
   const deleteButton = document.createElement("button");
   const editButton = document.createElement("button");
 
+  const room = roomsById.get(equipment.room_id);
   equipmentName.textContent = equipment.name;
-  equipmentRoom.textContent = `Room: ${roomList.find((r) => r.id === equipment.room_id).name}`;
+  equipmentRoom.textContent = `Room: ${room ? room.name : "Unknown room"}`;
   equipmentStatus.textContent = `Status: ${equipment.status}`;
 
   deleteButton.textContent = "Delete";
@@ -300,6 +302,8 @@ async function loadData() {
 
     equipmentList = equipments;
     roomList = rooms;
+
+    roomsById = new Map(roomList.map((room) => [room.id, room]));
 
     renderPage();
   } catch (err) {
