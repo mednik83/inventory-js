@@ -4,9 +4,7 @@ let searchQuery = "";
 let selectedRoom = "";
 let editingId = null;
 let equipmentList = [];
-
-// data constants
-const rooms = ["1", "2", "3", "4", "5"];
+let roomList = [];
 
 // nodes constants
 const searchInput = document.querySelector(".search-input");
@@ -18,12 +16,23 @@ const equipmentListNode = document.querySelector(".list");
 const submitButton = form.querySelector("button");
 const cancelButton = document.querySelector(".cancel-button");
 
-const API_URL = "http://localhost:8010/equipments";
+const API_URL = "http://localhost:8010";
 
 // API fetch
+const roomApi = {
+  async fetchRooms() {
+    const response = await fetch(`${API_URL}/rooms`);
+
+    if (!response.ok) {
+      throw new Error("Faildet to fetch rooms");
+    }
+    return await response.json();
+  },
+};
+
 const equipmentApi = {
   async fetchEquipments() {
-    const response = await fetch(API_URL);
+    const response = await fetch(`${API_URL}/equipments`);
 
     if (!response.ok) {
       throw new Error("Failed to fetch equipments");
@@ -33,7 +42,7 @@ const equipmentApi = {
   },
 
   async createEquipment(equipment) {
-    const response = await fetch(API_URL, {
+    const response = await fetch(`${API_URL}/equipments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -49,7 +58,7 @@ const equipmentApi = {
   },
 
   async editEquipment(id, equipment) {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await fetch(`${API_URL}/equipments/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -65,7 +74,7 @@ const equipmentApi = {
   },
 
   async removeEquipment(id) {
-    const response = await fetch(`${API_URL}/${id}`, {
+    const response = await fetch(`${API_URL}/equipments/${id}`, {
       method: "DELETE",
     });
 
@@ -87,7 +96,8 @@ const UTILS = {
   getFilteredEquipmentList() {
     return equipmentList.filter((eq) => {
       const matchesName = eq.name.toLowerCase().includes(searchQuery);
-      const matchesRoom = selectedRoom === "" || eq.room === selectedRoom;
+      const matchesRoom =
+        selectedRoom === "" || eq.room_id === Number(selectedRoom);
 
       return matchesName && matchesRoom;
     });
@@ -101,7 +111,7 @@ const UTILS = {
     editingId = equipment.id;
 
     form.elements.name.value = equipment.name;
-    form.elements.room.value = equipment.room;
+    form.elements.room.value = String(equipment.room_id);
     form.elements.status.value = equipment.status;
 
     submitButton.textContent = "Save";
@@ -110,19 +120,23 @@ const UTILS = {
 
 const equipmentService = {
   async create(name, room, status) {
-    await equipmentApi.createEquipment({ name, room, status });
-    await loadEquipments();
+    await equipmentApi.createEquipment({ name, room_id: Number(room), status });
+    await loadData();
   },
   async update(id, name, room, status) {
-    await equipmentApi.editEquipment(id, { name, room, status });
-    await loadEquipments();
+    await equipmentApi.editEquipment(id, {
+      name,
+      room_id: Number(room),
+      status,
+    });
+    await loadData();
   },
   async delete(id) {
     await equipmentApi.removeEquipment(id);
     if (editingId === id) {
       UTILS.resetFormState();
     }
-    await loadEquipments();
+    await loadData();
   },
   getById(id) {
     return equipmentList.find((eq) => eq.id === id);
@@ -147,7 +161,7 @@ function createEquipmentNode(equipment) {
   const editButton = document.createElement("button");
 
   equipmentName.textContent = equipment.name;
-  equipmentRoom.textContent = `Room: ${equipment.room}`;
+  equipmentRoom.textContent = `Room: ${roomList.find((r) => r.id === equipment.room_id).name}`;
   equipmentStatus.textContent = `Status: ${equipment.status}`;
 
   deleteButton.textContent = "Delete";
@@ -169,8 +183,26 @@ function createEquipmentNode(equipment) {
 }
 
 // render equipment list
-function renderEquipmentList() {
+function renderPage() {
   equipmentListNode.innerHTML = "";
+
+  selectRoom.innerHTML = `<option value="">Select room</option>`;
+  filterRoom.innerHTML = `<option value="">All rooms</option>`;
+
+  roomList.forEach((room) => {
+    const formOption = document.createElement("option");
+    formOption.value = String(room.id);
+    formOption.textContent = room.name;
+    selectRoom.appendChild(formOption);
+
+    const filterOption = document.createElement("option");
+    filterOption.value = String(room.id);
+    filterOption.textContent = room.name;
+    filterRoom.appendChild(filterOption);
+  });
+
+  filterRoom.value = selectedRoom;
+
   const equipments = UTILS.getFilteredEquipmentList();
 
   if (equipments.length === 0) {
@@ -190,10 +222,10 @@ form.addEventListener("submit", async (event) => {
   const data = new FormData(form);
 
   const name = data.get("name").trim();
-  const room = data.get("room").trim();
+  const roomId = data.get("room").trim();
   const status = data.get("status").trim();
 
-  if (!name || !room || !status) {
+  if (!name || !roomId || !status) {
     alert("Ошибка ввода");
     return;
   }
@@ -205,9 +237,9 @@ form.addEventListener("submit", async (event) => {
 
   try {
     if (editingId !== null) {
-      await equipmentService.update(editingId, name, room, status);
+      await equipmentService.update(editingId, name, roomId, status);
     } else {
-      await equipmentService.create(name, room, status);
+      await equipmentService.create(name, roomId, status);
     }
     UTILS.resetFormState();
   } catch (err) {
@@ -246,41 +278,36 @@ equipmentListNode.addEventListener("click", async (e) => {
 // listener for search
 searchInput.addEventListener("input", (e) => {
   searchQuery = e.target.value.toLowerCase();
-  renderEquipmentList();
+  renderPage();
 });
 
 // listener for rooms filter
 filterRoom.addEventListener("change", (e) => {
   selectedRoom = e.target.value;
-  renderEquipmentList();
+  renderPage();
 });
 
 cancelButton.addEventListener("click", () => {
   UTILS.resetFormState();
 });
 
-// init
-rooms.forEach((room) => {
-  const formOption = document.createElement("option");
-  formOption.value = room;
-  formOption.textContent = room;
-  selectRoom.appendChild(formOption);
-
-  const filterOption = document.createElement("option");
-  filterOption.value = room;
-  filterOption.textContent = room;
-  filterRoom.appendChild(filterOption);
-});
-
-async function loadEquipments() {
+async function loadData() {
   try {
-    equipmentList = await equipmentApi.fetchEquipments();
-    renderEquipmentList();
+    const [equipments, rooms] = await Promise.all([
+      equipmentApi.fetchEquipments(),
+      roomApi.fetchRooms(),
+    ]);
+
+    equipmentList = equipments;
+    roomList = rooms;
+
+    renderPage();
   } catch (err) {
     console.error(err);
     equipmentList = [];
-    equipmentListNode.textContent = "Failed to load equipment";
+    roomList = [];
+    equipmentListNode.textContent = "Failed to load data";
   }
 }
 
-loadEquipments();
+loadData();
