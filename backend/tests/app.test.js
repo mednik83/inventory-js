@@ -4,7 +4,7 @@ import { app } from "../app.js";
 
 const testEquipment = {
   name: "Printer",
-  room: "1",
+  room_id: 1,
   status: "active",
 };
 
@@ -27,14 +27,14 @@ describe("POST /equipments", () => {
       .post("/equipments")
       .send({
         name: "Printer",
-        room: "1",
+        room_id: 1,
         status: "active",
       })
       .expect("Content-Type", /json/)
       .expect(201)
       .expect((response) => {
         assert.strictEqual(response.body.name, testEquipment.name);
-        assert.strictEqual(response.body.room, testEquipment.room);
+        assert.strictEqual(response.body.room_id, testEquipment.room_id);
         assert.strictEqual(response.body.status, testEquipment.status);
       });
   });
@@ -43,7 +43,7 @@ describe("POST /equipments", () => {
     await request(app)
       .post("/equipments")
       .send({
-        room: "1",
+        room_id: 1,
         status: "active",
       })
       .expect(400);
@@ -62,7 +62,7 @@ describe("equipment flow", () => {
       .post("/equipments")
       .send({
         name: testEquipment.name,
-        room: testEquipment.room,
+        room_id: testEquipment.room_id,
         status: testEquipment.status,
       })
       .expect("Content-Type", /json/)
@@ -73,7 +73,7 @@ describe("equipment flow", () => {
 
     assert.ok(id);
     assert.strictEqual(createdEquipment.name, testEquipment.name);
-    assert.strictEqual(createdEquipment.room, testEquipment.room);
+    assert.strictEqual(createdEquipment.room_id, testEquipment.room_id);
     assert.strictEqual(createdEquipment.status, testEquipment.status);
 
     const getRes = await request(app)
@@ -86,7 +86,7 @@ describe("equipment flow", () => {
 
     const putEquipment = {
       name: "updated",
-      room: "2",
+      room_id: 2,
       status: "inactive",
     };
 
@@ -98,7 +98,7 @@ describe("equipment flow", () => {
 
     assert.strictEqual(putRes.body.id, id);
     assert.strictEqual(putRes.body.name, putEquipment.name);
-    assert.strictEqual(putRes.body.room, putEquipment.room);
+    assert.strictEqual(putRes.body.room_id, putEquipment.room_id);
     assert.strictEqual(putRes.body.status, putEquipment.status);
 
     await request(app).delete(`/equipments/${id}`).expect(204);

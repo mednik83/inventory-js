@@ -1,12 +1,14 @@
 import express from "express";
 import cors from "cors";
 
-import equipmentRoutes from "./routes/route.js";
+import equipmentRoutes from "./routes/equipment.routes.js";
+import roomRoutes from "./routes/room.equipment.js";
 
 export const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// router
+// routes
 app.use("/equipments", equipmentRoutes);
+app.use("/rooms", roomRoutes);

@@ -1,4 +1,4 @@
-import { equipmentRepository } from "../repositories/repository.js";
+import { equipmentRepository } from "../repositories/equipment.repository.js";
 
 function validateId(id) {
   const equipmentId = Number(id);
@@ -12,16 +12,24 @@ function validateId(id) {
 
 function validateEquipment(data) {
   const name = data.name?.trim();
-  const room = data.room?.trim();
+  const room_id = String(data.room_id)?.trim();
   const status = data.status?.trim();
 
-  if (!name || !room || !status) {
+  if (name.length < 2) {
+    throw new Error("The name is too short");
+  }
+
+  if (Number.isNaN(+room_id)) {
+    throw new Error("The room number must be a number");
+  }
+
+  if (!name || !room_id || !status) {
     throw new Error("Invalid equipment data");
   }
 
   return {
     name,
-    room,
+    room_id: Number(room_id),
     status,
   };
 }
@@ -37,7 +45,7 @@ class EquipmentService {
     return equipment;
   }
 
-  getAll() {
+  getAll(limit = 0) {
     return equipmentRepository.findAll();
   }
 

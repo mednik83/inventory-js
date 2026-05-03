@@ -1,4 +1,4 @@
-import { equipmentService } from "../services/service.js";
+import { equipmentService } from "../services/equipment.service.js";
 
 class EquipmentController {
   getById(req, res) {

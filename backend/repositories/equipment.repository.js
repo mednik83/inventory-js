@@ -4,10 +4,10 @@ class EquipmentRepository {
   create(equipment) {
     db.prepare(
       `
-      INSERT INTO equipments (id, name, room, status)
+      INSERT INTO equipments (id, name, room_id, status)
       VALUES (?, ?, ?, ?)
     `,
-    ).run(equipment.id, equipment.name, equipment.room, equipment.status);
+    ).run(equipment.id, equipment.name, equipment.room_id, equipment.status);
 
     return equipment;
   }
@@ -48,11 +48,11 @@ class EquipmentRepository {
       .prepare(
         `
       UPDATE equipments
-      SET name = ?, room = ?, status = ?
+      SET name = ?, room_id = ?, status = ?
       WHERE id = ?
       `,
       )
-      .run(equipment.name, equipment.room, equipment.status, equipment.id);
+      .run(equipment.name, equipment.room_id, equipment.status, equipment.id);
 
     return result;
   }
