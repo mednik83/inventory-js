@@ -1,4 +1,5 @@
 import { roomService } from "../services/room.service.js";
+import { handleControllerError } from "../utils/error-handler.js";
 
 class RoomController {
   getAll(req, res) {
@@ -6,7 +7,7 @@ class RoomController {
       const rooms = roomService.getAll();
       res.json(rooms);
     } catch (error) {
-      return res.status(500).json({ message: "Failed to get rooms" });
+      handleControllerError(error, res);
     }
   }
 }

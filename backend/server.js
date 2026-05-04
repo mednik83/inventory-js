@@ -1,9 +1,11 @@
 import { app } from "./app.js";
 
-const host = "localhost";
+// const host = "localhost";
+// const host = "0.0.0.0";
+
 const port = 8010;
 
 // start server
-app.listen(port, host, () => {
-  console.log(`Server listens http://${host}:${port}`);
+app.listen(port, () => {
+  console.log(`Server listens on port ${port}`);
 });

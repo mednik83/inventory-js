@@ -1,3 +1,4 @@
+import { NotFoundError } from "../errors/errors.js";
 import { roomRepository } from "../repositories/room.repository.js";
 
 class RoomService {
@@ -8,7 +9,7 @@ class RoomService {
     const room = roomRepository.findById(id);
 
     if (!room) {
-      return false;
+      throw new NotFoundError("Room not found");
     }
 
     return room;

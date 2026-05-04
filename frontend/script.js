@@ -17,7 +17,8 @@ const equipmentListNode = document.querySelector(".list");
 const submitButton = form.querySelector("button");
 const cancelButton = document.querySelector(".cancel-button");
 
-const API_URL = "http://localhost:8010";
+// const API_URL = "http://localhost:8010";
+const API_URL = "http://192.168.88.225:8010";
 
 // API fetch
 const roomApi = {
