@@ -1,4 +1,5 @@
-import { NotFoundError, ValidationError } from "../errors/errors.js";
+import { AppError, NotFoundError, ValidationError } from "../errors/errors.js";
+import { equipmentRepository } from "../repositories/equipment.repository.js";
 import { roomRepository } from "../repositories/room.repository.js";
 import { validateId } from "../utils/validate-id.js";
 
@@ -65,13 +66,22 @@ class RoomService {
   delete(id) {
     const roomId = validateId(id);
 
-    const result = roomRepository.deleteById(id);
+    const room = roomRepository.findById(roomId);
 
-    if (result.changes === 0) {
+    if (!room) {
       throw new NotFoundError("Room not found");
     }
 
-    return true;
+    const equipmentsCount = equipmentRepository.countByRoomId(roomId);
+
+    if (equipmentsCount.length > 0) {
+      throw new AppError(
+        "Room cannot be deleted because it is used by equipmen",
+        400,
+      );
+    }
+
+    return roomRepository.deleteById(roomId);
   }
 }
 

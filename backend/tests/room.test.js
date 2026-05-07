@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { app } from "../app.js";
 import db from "../database/db.js";
 
-describe("Roop API", () => {
+describe("Room API", () => {
   beforeEach(() => {
     db.prepare("DELETE FROM equipments").run();
     db.prepare("DELETE FROM rooms").run();

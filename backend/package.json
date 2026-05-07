@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node --env-file=.env server.js",
+    "start": "nodemon --env-file=.env server.js",
     "test": "DB_PATH=./database/inventory.test.sqlite mocha ./tests/*"
   },
   "keywords": [],

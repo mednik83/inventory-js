@@ -2,6 +2,7 @@ import { equipmentRepository } from "../repositories/equipment.repository.js";
 import { roomService } from "./room.service.js";
 import { validateId } from "../utils/validate-id.js";
 import { ValidationError, NotFoundError } from "../errors/errors.js";
+import { validateStatus } from "../utils/validate-status.js";
 
 function validateEquipment(data) {
   const name = data.name?.trim();
@@ -12,11 +13,7 @@ function validateEquipment(data) {
     throw new ValidationError("Invalid equipment data");
   }
 
-  const allowedStatuses = ["active", "inactive", "written_off"];
-
-  if (!allowedStatuses.includes(status)) {
-    throw new ValidationError("Invalid status");
-  }
+  validateStatus(status);
 
   if (name.length < 2) {
     throw new ValidationError("The name is too short");
@@ -46,8 +43,8 @@ class EquipmentService {
     return equipment;
   }
 
-  getAll() {
-    return equipmentRepository.findAll();
+  getAll(filters) {
+    return equipmentRepository.findAll(filters);
   }
 
   create(data) {

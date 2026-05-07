@@ -25,24 +25,34 @@ class EquipmentRepository {
       .get(id);
   }
 
-  findAll(limit = 0) {
-    if (limit > 0) {
-      return db
-        .prepare(
-          `
-        SELECT * FROM equipments
-        LIMIT ?
-        `,
-        )
-        .all(limit);
+  findAll(filters = {}) {
+    let sql = `
+      SELECT * FROM equipments
+    `;
+    const conditions = [];
+    const params = [];
+
+    if (filters.roomIds) {
+      const placeholders = filters.roomIds.map(() => "?").join(", ");
+      conditions.push(`room_id IN (${placeholders})`);
+      params.push(...filters.roomIds);
     }
-    return db
-      .prepare(
-        `
-        SELECT * FROM equipments
-        `,
-      )
-      .all();
+
+    if (filters.status) {
+      conditions.push("status = ?");
+      params.push(filters.status);
+    }
+
+    if (conditions.length > 0) {
+      sql += "WHERE " + conditions.join(" AND ");
+    }
+
+    if (filters.limit) {
+      sql += " LIMIT ?";
+      params.push(filters.limit);
+    }
+
+    return db.prepare(sql).all(...params);
   }
 
   update(equipment) {
@@ -57,6 +67,16 @@ class EquipmentRepository {
       .run(equipment.name, equipment.room_id, equipment.status, equipment.id);
 
     return result;
+  }
+
+  countByRoomId(roomId) {
+    return db
+      .prepare(
+        `
+      SELECT * FROM equipments
+      WHERE room_id = ?`,
+      )
+      .all(roomId);
   }
 
   deleteById(id) {
