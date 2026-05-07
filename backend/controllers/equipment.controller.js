@@ -1,7 +1,9 @@
 import { ValidationError } from "../errors/errors.js";
 import { equipmentService } from "../services/equipment.service.js";
+import { qrCodeService } from "../services/qr-code.service.js";
 import { handleControllerError } from "../utils/error-handler.js";
 import { validateStatus } from "../utils/validate-status.js";
+import { validateUuid } from "../utils/validate-uuid.js";
 
 function parsePositiveInteger(value, fieldName) {
   if (value === undefined) {
@@ -110,6 +112,22 @@ class EquipmentController {
       equipmentService.delete(req.params.id);
 
       return res.status(204).send();
+    } catch (error) {
+      return handleControllerError(error, res);
+    }
+  }
+
+  async getQrByUuid(req, res) {
+    try {
+      const { uuid } = req.params;
+
+      const validUuid = validateUuid(uuid);
+      const equipment = equipmentService.getByUuid(validUuid);
+
+      const qrSvg = await qrCodeService.generateSvg(equipment.uuid);
+
+      res.type("image/svg+xml");
+      return res.send(qrSvg);
     } catch (error) {
       return handleControllerError(error, res);
     }
