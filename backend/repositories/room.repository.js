@@ -20,6 +20,7 @@ class RoomRepository {
       )
       .all();
   }
+
   findById(id) {
     return db
       .prepare(
@@ -29,6 +30,41 @@ class RoomRepository {
       `,
       )
       .get(id);
+  }
+
+  create(room) {
+    const result = db
+      .prepare(
+        `
+      INSERT INTO rooms (name)
+      VALUES (?)
+      `,
+      )
+      .run(room.name);
+    return this.findById(result.lastInsertRowid);
+  }
+
+  update(room) {
+    return db
+      .prepare(
+        `
+      UPDATE rooms
+      SET name = ?
+      WHERE id = ?
+      `,
+      )
+      .run(room.name, room.id);
+  }
+
+  deleteById(id) {
+    return db
+      .prepare(
+        `
+      DELETE FROM rooms
+      WHERE id = ?
+      `,
+      )
+      .run(id);
   }
 }
 

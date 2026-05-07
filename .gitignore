@@ -4,3 +4,4 @@ node_modules/
 inventory.sqlite-shm
 inventory.sqlite-wal
 .env
+*.sqlite*
