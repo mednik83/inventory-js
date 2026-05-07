@@ -16,26 +16,6 @@ db.prepare(
   `,
 ).run();
 
-const roomsCountRow = db
-  .prepare(
-    `
-  SELECT COUNT(*) as count FROM rooms
-`,
-  )
-  .get();
-
-if (roomsCountRow.count === 0) {
-  const insertRoom = db.prepare(
-    `
-  INSERT INTO rooms (name)
-  VALUES (?)
-  `,
-  );
-  for (let i = 1; i < 11; i++) {
-    insertRoom.run(String(i));
-  }
-}
-
 db.prepare(
   `
   CREATE TABLE IF NOT EXISTS equipments (
