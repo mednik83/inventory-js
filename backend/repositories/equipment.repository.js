@@ -5,21 +5,48 @@ class EquipmentRepository {
     const result = db
       .prepare(
         `
-      INSERT INTO equipments (name, room_id, status)
-      VALUES (?, ?, ?)
+      INSERT INTO equipments (uuid, name, room_id, status)
+      VALUES (?, ?, ?, ?)
     `,
       )
-      .run(equipment.name, equipment.room_id, equipment.status);
+      .run(equipment.uuid, equipment.name, equipment.room_id, equipment.status);
 
     return this.findById(result.lastInsertRowid);
+  }
+
+  findByUuid(uuid) {
+    return db
+      .prepare(
+        `
+      SELECT 
+        equipments.id,
+        equipments.uuid,
+        equipments.name,
+        equipments.room_id,
+        rooms.name AS room_name,
+        equipments.status
+      FROM equipments
+      JOIN rooms ON rooms.id = equipments.room_id
+      WHERE equipments.uuid = ?
+      `,
+      )
+      .get(uuid);
   }
 
   findById(id) {
     return db
       .prepare(
         `
-      SELECT * FROM equipments
-      WHERE id = ?
+      SELECT 
+        equipments.id,
+        equipments.uuid,
+        equipments.name,
+        equipments.room_id,
+        rooms.name AS room_name,
+        equipments.status
+      FROM equipments
+      JOIN rooms ON rooms.id = equipments.room_id
+      WHERE equipments.id = ?
       `,
       )
       .get(id);
