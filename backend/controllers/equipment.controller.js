@@ -57,7 +57,15 @@ class EquipmentController {
   getById(req, res) {
     try {
       const equipment = equipmentService.getById(req.params.id);
+      return res.json(equipment);
+    } catch (error) {
+      return handleControllerError(error, res);
+    }
+  }
 
+  getByUuid(req, res) {
+    try {
+      const equipment = equipmentService.getByUuid(req.params.uuid);
       return res.json(equipment);
     } catch (error) {
       return handleControllerError(error, res);

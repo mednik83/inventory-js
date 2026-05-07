@@ -20,6 +20,7 @@ db.prepare(
   `
   CREATE TABLE IF NOT EXISTS equipments (
     id INTEGER PRIMARY KEY,
+    uuid TEXT NOT NULL UNIQUE,
     name TEXT NOT NULL,
     room_id INTEGER NOT NULL,
     status TEXT NOT NULL,

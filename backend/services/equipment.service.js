@@ -3,6 +3,8 @@ import { roomService } from "./room.service.js";
 import { validateId } from "../utils/validate-id.js";
 import { ValidationError, NotFoundError } from "../errors/errors.js";
 import { validateStatus } from "../utils/validate-status.js";
+import { v4 as uuidv4 } from "uuid";
+import { validateUuid } from "../utils/validate-uuid.js";
 
 function validateEquipment(data) {
   const name = data.name?.trim();
@@ -40,6 +42,18 @@ class EquipmentService {
     if (!equipment) {
       throw new NotFoundError("Equipment not found");
     }
+
+    return equipment;
+  }
+
+  getByUuid(uuid) {
+    const equipmentUuid = validateUuid(uuid);
+    const equipment = equipmentRepository.findByUuid(equipmentUuid);
+
+    if (!equipment) {
+      throw new NotFoundError("Equipment not found");
+    }
+
     return equipment;
   }
 
@@ -53,6 +67,7 @@ class EquipmentService {
     roomService.getById(validData.room_id);
 
     const equipment = {
+      uuid: uuidv4(),
       ...validData,
     };
 

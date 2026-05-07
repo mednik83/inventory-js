@@ -11,6 +11,10 @@ equipmentRouter.get("/:id", (req, res) => {
   equipmentController.getById(req, res);
 });
 
+equipmentRouter.get("/uuid/:uuid", (req, res) => {
+  equipmentController.getByUuid(req, res);
+});
+
 equipmentRouter.post("/", (req, res) => {
   equipmentController.create(req, res);
 });
