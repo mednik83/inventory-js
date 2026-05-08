@@ -8,8 +8,9 @@ describe("Equipment API", () => {
   let secondRoomId;
 
   beforeEach(async () => {
-    db.prepare(`DELETE FROM equipments`).run();
-    db.prepare(`DELETE FROM rooms`).run();
+    db.prepare("DELETE FROM operations").run();
+    db.prepare("DELETE FROM equipments").run();
+    db.prepare("DELETE FROM rooms").run();
 
     const firstRoomRes = await request(app)
       .post("/rooms")
@@ -262,7 +263,7 @@ describe("Equipment API", () => {
 
       const id = createRes.body.id;
 
-      await request(app).delete(`/equipments/${id}`).expect(204);
+      await request(app).delete(`/equipments/${id}/delete`).expect(204);
 
       await request(app).get(`/equipments/${id}`).expect(404);
     });
@@ -329,7 +330,7 @@ describe("Equipment API", () => {
       assert.strictEqual(putRes.body.room_id, putEquipment.room_id);
       assert.strictEqual(putRes.body.status, putEquipment.status);
 
-      await request(app).delete(`/equipments/${id}`).expect(204);
+      await request(app).delete(`/equipments/${id}/delete`).expect(204);
 
       await request(app).get(`/equipments/${id}`).expect(404);
     });

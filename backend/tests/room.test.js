@@ -5,6 +5,7 @@ import db from "../database/db.js";
 
 describe("Room API", () => {
   beforeEach(() => {
+    db.prepare("DELETE FROM operations").run();
     db.prepare("DELETE FROM equipments").run();
     db.prepare("DELETE FROM rooms").run();
   });

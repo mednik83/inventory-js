@@ -109,7 +109,17 @@ class EquipmentController {
   }
   remove(req, res) {
     try {
-      equipmentService.delete(req.params.id);
+      equipmentService.writtenOff(req.params.id);
+
+      return res.status(204).send();
+    } catch (error) {
+      return handleControllerError(error, res);
+    }
+  }
+
+  forceDelete(req, res) {
+    try {
+      equipmentService.forceDelete(req.params.id);
 
       return res.status(204).send();
     } catch (error) {

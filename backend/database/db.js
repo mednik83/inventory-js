@@ -29,4 +29,17 @@ db.prepare(
 `,
 ).run();
 
+db.prepare(
+  `
+  CREATE TABLE IF NOT EXISTS operations (
+    id INTEGER PRIMARY KEY,
+    equipment_id INTEGER NOT NULL,
+    type TEXT NOT NULL,
+    comment TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (equipment_id) REFERENCES equipments(id)
+  )
+  `,
+).run();
+
 export default db;
