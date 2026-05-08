@@ -10,6 +10,7 @@ describe("Equipment UUID and QR API", () => {
   let equipmentUuid;
 
   beforeEach(async () => {
+    db.prepare("DELETE FROM operations").run();
     db.prepare("DELETE FROM equipments").run();
     db.prepare("DELETE FROM rooms").run();
 
