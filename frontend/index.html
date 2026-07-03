@@ -14,28 +14,28 @@
         <main class="app">
             <section class="panel">
                 <h2>Add equipment</h2>
-                <form class="form">
+                <form class="form" id="equipment-form">
                     <div class="form-field">
-                        <label for="name">Equipment name</label>
+                        <label for="equipment-name">Equipment name</label>
                         <input
                             type="text"
                             name="name"
                             class="input"
                             placeholder="Printer"
-                            id="name"
+                            id="equipment-name"
                         />
                     </div>
                     <div class="form-field">
-                        <label for="room">Room</label>
+                        <label for="equipment-room">Room</label>
                         <select
                             name="room"
-                            id="room"
+                            id="equipment-room"
                             class="select-room"
                         ></select>
                     </div>
                     <div class="form-field">
-                        <label for="status">Status</label>
-                        <select name="status" id="status">
+                        <label for="equipment-status">Status</label>
+                        <select name="status" id="equipment-status">
                             <option value="active">active</option>
                             <option value="inactive">inactive</option>
                         </select>
@@ -52,6 +52,35 @@
                             Cancel
                         </button>
                     </div>
+                    <p id="equipment-form-error"></p>
+                </form>
+            </section>
+            <section class="panel">
+                <h2>Add Room</h2>
+                <form class="form" id="room-form">
+                    <div class="form-field">
+                        <label for="room-name">Room name</label>
+                        <input
+                            type="text"
+                            name="name"
+                            class="input"
+                            placeholder="Room 101"
+                            id="room-name"
+                        />
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="button button-primary">
+                            Add
+                        </button>
+                        <button
+                            type="button"
+                            class="button button-secondary cancel-button"
+                            hidden
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                    <p id="room-form-error"></p>
                 </form>
             </section>
             <section class="panel">
@@ -62,7 +91,7 @@
                         <input
                             type="text"
                             class="search-input"
-                            id="search"
+                            id="search-input"
                             placeholder="search by name"
                         />
                     </div>
@@ -74,11 +103,16 @@
                     </div>
                 </div>
             </section>
+            <section class="room-section">
+                <h2>Room list</h2>
+                <div id="room-list" class="list"></div>
+            </section>
             <section class="equipment-section">
                 <h2>Equipment list</h2>
-                <div class="list"></div>
+                <div id="equipment-list" class="list"></div>
             </section>
+            <section id="qr-container"></section>
         </main>
-        <script src="script.js"></script>
+        <script type="module" src="./src/main.js"></script>
     </body>
 </html>

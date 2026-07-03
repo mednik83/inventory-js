@@ -11,11 +11,12 @@ Backend построен на Node.js + Express, данные хранятся �
 
 - создание оборудования
 - просмотр списка оборудования
-- просмотр оборудования по `id`
+- просмотр оборудования по `id` и `uuid`
 - редактирование оборудования
 - удаление оборудования
 - поиск по названию
 - фильтрация по комнате
+- генерация qr-кода по uuid
 
 ### Комнаты
 
@@ -54,6 +55,8 @@ Backend построен на Node.js + Express, данные хранятся �
 - CORS
 - Mocha
 - Supertest
+- qrcode
+- uuid
 
 ---
 
@@ -102,6 +105,7 @@ inventory-js/
     services/
       equipment.service.js
       room.service.js
+      qr-code.service.js
 
     repositories/
       equipment.repository.js
@@ -111,10 +115,14 @@ inventory-js/
       errors.js
 
     utils/
+      error-handler.js
       validate-id.js
+      validate-status.js
+      validate-uuid.js
 
     tests/
       equipment.test.js
+      equipment.uuid.test.js
       room.test.js
 
   README.md
