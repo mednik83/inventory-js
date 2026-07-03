@@ -98,6 +98,7 @@ class EquipmentController {
       return handleControllerError(error, res);
     }
   }
+
   update(req, res) {
     try {
       const equipment = equipmentService.update(req.params.id, req.body);
@@ -107,7 +108,8 @@ class EquipmentController {
       return handleControllerError(error, res);
     }
   }
-  remove(req, res) {
+
+  writeOff(req, res) {
     try {
       equipmentService.writtenOff(req.params.id);
 

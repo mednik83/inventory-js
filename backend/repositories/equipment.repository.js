@@ -18,7 +18,7 @@ class EquipmentRepository {
     return db
       .prepare(
         `
-      SELECT 
+      SELECT
         equipments.id,
         equipments.uuid,
         equipments.name,
@@ -37,7 +37,7 @@ class EquipmentRepository {
     return db
       .prepare(
         `
-      SELECT 
+      SELECT
         equipments.id,
         equipments.uuid,
         equipments.name,
@@ -54,7 +54,14 @@ class EquipmentRepository {
 
   findAll(filters = {}) {
     let sql = `
-      SELECT * FROM equipments
+      SELECT
+        equipments.id,
+        equipments.uuid,
+        equipments.name,
+        equipments.room_id,
+        rooms.name AS room_name,
+        equipments.status
+      FROM equipments
     `;
     const conditions = [];
     const params = [];
@@ -78,6 +85,8 @@ class EquipmentRepository {
       sql += " LIMIT ?";
       params.push(filters.limit);
     }
+
+    sql += " JOIN rooms ON rooms.id = equipments.room_id ";
 
     return db.prepare(sql).all(...params);
   }

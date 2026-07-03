@@ -135,7 +135,7 @@ class EquipmentService {
 
   forceDelete(id) {
     const equipmentId = validateId(id);
-    this.getById(equipmentId); // validate id
+    this.getById(id); // validate id
 
     operationRepository.deleteByEquipmentId(equipmentId);
 

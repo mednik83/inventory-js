@@ -23,8 +23,8 @@ equipmentRouter.put("/:id", (req, res) => {
   equipmentController.update(req, res);
 });
 
-equipmentRouter.delete("/:id", (req, res) => {
-  equipmentController.remove(req, res);
+equipmentRouter.patch("/:id", (req, res) => {
+  equipmentController.writeOff(req, res);
 });
 
 equipmentRouter.delete("/:id/delete", (req, res) => {

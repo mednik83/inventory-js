@@ -270,14 +270,14 @@ describe("Equipment API", () => {
 
     it("should return 400 for invalid id on delete", async () => {
       await request(app)
-        .delete("/equipments/abc")
+        .delete("/equipments/abc/delete")
         .expect("Content-Type", /json/)
         .expect(400);
     });
 
     it("should return 404 if equipment does not exist on delete", async () => {
       await request(app)
-        .delete("/equipments/9999999999")
+        .delete("/equipments/9999999999/delete")
         .expect("Content-Type", /json/)
         .expect(404);
     });
