@@ -42,6 +42,10 @@ class RoomService {
       ...validData,
     };
 
+    if (roomRepository.findByName(room.name)) {
+      throw new ValidationError("The room must be unique");
+    }
+
     return roomRepository.create(room);
   }
 

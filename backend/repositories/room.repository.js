@@ -21,6 +21,17 @@ class RoomRepository {
       .all();
   }
 
+  findByName(name) {
+    return db
+      .prepare(
+        `
+      SELECT * FROM rooms
+      WHERE name = ?
+      `,
+      )
+      .get(name);
+  }
+
   findById(id) {
     return db
       .prepare(
