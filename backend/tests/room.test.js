@@ -76,20 +76,6 @@ describe("Room API", () => {
           .expect("Content-Type", /json/)
           .expect(400);
       });
-
-      // Включай этот тест, только если у тебя реально реализован конфликт дубликатов через 409
-      // it("should return 409 if room already exists", async () => {
-      //   await request(app)
-      //     .post("/rooms")
-      //     .send({ name: "Room 101" })
-      //     .expect(201);
-      //
-      //   await request(app)
-      //     .post("/rooms")
-      //     .send({ name: "Room 101" })
-      //     .expect("Content-Type", /json/)
-      //     .expect(409);
-      // });
     });
 
     describe("GET /rooms/:id", () => {
@@ -189,25 +175,6 @@ describe("Room API", () => {
           .expect("Content-Type", /json/)
           .expect(404);
       });
-
-      // Включай, если реализовал 409 на дубликаты
-      // it("should return 409 if updated room name already exists", async () => {
-      //   const firstRoomRes = await request(app)
-      //     .post("/rooms")
-      //     .send({ name: "Room 101" })
-      //     .expect(201);
-      //
-      //   await request(app)
-      //     .post("/rooms")
-      //     .send({ name: "Room 202" })
-      //     .expect(201);
-      //
-      //   await request(app)
-      //     .put(`/rooms/${firstRoomRes.body.id}`)
-      //     .send({ name: "Room 202" })
-      //     .expect("Content-Type", /json/)
-      //     .expect(409);
-      // });
     });
 
     describe("DELETE /rooms/:id", () => {
@@ -237,28 +204,6 @@ describe("Room API", () => {
           .expect("Content-Type", /json/)
           .expect(404);
       });
-
-      // Включай, если у тебя удаление комнаты запрещено, когда на неё ссылается equipment
-      // it("should return 409 if room is used by equipment", async () => {
-      //   const roomRes = await request(app)
-      //     .post("/rooms")
-      //     .send({ name: "Room 101" })
-      //     .expect(201);
-      //
-      //   await request(app)
-      //     .post("/equipments")
-      //     .send({
-      //       name: "Printer",
-      //       room_id: roomRes.body.id,
-      //       status: "active",
-      //     })
-      //     .expect(201);
-      //
-      //   await request(app)
-      //     .delete(`/rooms/${roomRes.body.id}`)
-      //     .expect("Content-Type", /json/)
-      //     .expect(409);
-      // });
     });
 
     describe("room flow", () => {

@@ -22,7 +22,7 @@ body {
     padding: 0 0 8px;
 }
 
-#links {
+.links {
     width: 100%;
     max-width: 1024px;
     margin: 24px auto;
@@ -34,4 +34,84 @@ body {
     max-width: 1024px;
     margin: 24px auto;
     padding: 0 20px;
+}
+
+.equipment {
+    margin: 10px auto;
+    border: 1px solid black;
+    min-height: 140px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.equipment_left {
+    display: flex;
+    gap: 20px;
+}
+
+.equipment_right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.qrcontainer {
+    min-width: 140px;
+}
+
+.form_equipment {
+    display: flex;
+    gap: 20px;
+}
+
+.form_room {
+    display: flex;
+    gap: 20px;
+}
+
+.form_room > input {
+    padding: 10px;
+    width: 300px;
+}
+
+.form_equipment > input {
+    padding: 10px;
+    width: 300px;
+}
+
+.form_div {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-error {
+    color: red;
+}
+
+.button {
+    width: 100px;
+    padding: 10px;
+}
+
+.room {
+    min-height: 80px;
+    margin: 10px auto;
+    border: 1px solid black;
+
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.room_left {
+    display: flex;
+    gap: 20px;
+}
+
+.room_right {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }

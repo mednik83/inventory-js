@@ -1,10 +1,16 @@
 class State {
   #equipments = [];
   #rooms = [];
+  #route = "equipments";
   #filter = { search: "", status: "", roomId: "" };
   #loading = false;
   #error = null;
-  #modal = null;
+  #modal = {
+    mode: null,
+    item: null,
+    submitting: false,
+    error: null,
+  };
   #listeners = [];
   // Оповещение
   #notify = () => {
@@ -23,9 +29,22 @@ class State {
   getFilter = () => ({ ...this.#filter });
   getLoading = () => this.#loading;
   getError = () => this.#error;
+  getModal = () => ({ ...this.#modal });
+  getRoute = () => this.#route;
 
   setEquipments = (equipments) => {
     this.#equipments = [...equipments];
+    this.#notify();
+  };
+
+  setRoute = (route) => {
+    this.#route = route;
+    this.setModal({
+      mode: null,
+      item: null,
+      submitting: false,
+      error: null,
+    });
     this.#notify();
   };
 
@@ -46,6 +65,14 @@ class State {
 
   setError = (error) => {
     this.#error = error;
+    this.#notify();
+  };
+
+  setModal = (modal) => {
+    this.#modal = {
+      ...this.#modal,
+      ...modal,
+    };
     this.#notify();
   };
 }
