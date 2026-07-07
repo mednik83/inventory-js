@@ -44,6 +44,9 @@ const API = {
       method: "DELETE",
     }),
 
+  writenOffEquipment: async (id) =>
+    request(`/equipments/${id}`, { method: "PATCH" }),
+
   getQRCode: async (uuid) => {
     const res = await fetch(`${BASE_URL}/equipments/uuid/${uuid}/qr`);
     if (!res.ok) throw new Error(`Error ${res.status}`);

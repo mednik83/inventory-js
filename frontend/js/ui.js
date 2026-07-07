@@ -131,3 +131,15 @@ export async function getQRCode(uuid) {
     throw new Error("Не удалось загрузит QRCode");
   }
 }
+
+export async function writeOffEquipment(state, id) {
+  if (!confirm("Вы действительно хотите списать оборудование?")) {
+    return;
+  }
+  try {
+    await API.writenOffEquipment(id);
+    await loadData(state);
+  } catch (err) {
+    state.setError(err.message);
+  }
+}

@@ -4,6 +4,7 @@ import {
   getQRCode,
   deleteRoom,
   createRoom,
+  writeOffEquipment,
 } from "./ui.js";
 
 export function render(state) {
@@ -106,6 +107,11 @@ function renderEquipment(state, equipment) {
     deleteEquipment(state, equipment.id);
   });
 
+  const writeOffButton = createButton("Write Off");
+  writeOffButton.addEventListener("click", () => {
+    writeOffEquipment(state, equipment.id);
+  });
+
   const updateButton = createButton("Update");
   updateButton.addEventListener("click", () => {
     return;
@@ -121,7 +127,7 @@ function renderEquipment(state, equipment) {
     }
   });
 
-  rightData.append(deleteButton, updateButton, getQRCodeButton);
+  rightData.append(deleteButton, writeOffButton, updateButton, getQRCodeButton);
 
   equipmentItem.append(leftData, rightData);
 
