@@ -5,6 +5,10 @@ import {
   deleteRoom,
   createRoom,
   writeOffEquipment,
+  updateEquipment,
+  updateRoom,
+  changeModeToUpdateEquipment,
+  changeModeToUpdateRoom,
 } from "./ui.js";
 
 export function render(state) {
@@ -114,7 +118,7 @@ function renderEquipment(state, equipment) {
 
   const updateButton = createButton("Update");
   updateButton.addEventListener("click", () => {
-    return;
+    changeModeToUpdateEquipment(state, equipment);
   });
 
   const getQRCodeButton = createButton("Get QRCode");
@@ -154,6 +158,7 @@ function renderRoom(state, room) {
 
   const updateButton = createButton("Update");
   updateButton.addEventListener("click", () => {
+    changeModeToUpdateRoom(state, room);
     return;
   });
 
@@ -230,6 +235,14 @@ function renderEquipmentForm(state) {
   });
 
   const button = createButton("Send");
+
+  if (modal.mode === "edit") {
+    nameInput.value = modal.item.name;
+    statusSelect.value = modal.item.status;
+    roomSelect.value = modal.item.room_id;
+    button.textContent = "Update";
+  }
+
   formNode.onsubmit = async (e) => {
     e.preventDefault();
 
@@ -242,6 +255,11 @@ function renderEquipmentForm(state) {
       status: status,
       room_id: roomId,
     };
+
+    if (modal.mode === "edit") {
+      await updateEquipment(state, modal.item.id, formData);
+      return;
+    }
 
     await createEquipment(state, formData);
   };
@@ -278,6 +296,11 @@ function renderRoomForm(state) {
 
   const button = createButton("Send");
 
+  if (modal.mode === "edit") {
+    nameInput.value = modal.item.name;
+    button.textContent = "Update";
+  }
+
   formNode.onsubmit = async (e) => {
     e.preventDefault();
 
@@ -286,6 +309,11 @@ function renderRoomForm(state) {
     const formData = {
       name: name,
     };
+
+    if (modal.mode === "edit") {
+      await updateRoom(state, modal.item.id, formData);
+      return;
+    }
 
     await createRoom(state, formData);
   };

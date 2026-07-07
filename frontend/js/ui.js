@@ -143,3 +143,83 @@ export async function writeOffEquipment(state, id) {
     state.setError(err.message);
   }
 }
+
+export async function updateEquipment(state, id, formData) {
+  state.setModal({
+    mode: "edit",
+    item: formData,
+    submitting: true,
+  });
+
+  if (formData.name === "" || !formData.status || !formData.room_id) {
+    state.setModal({
+      error: "incorrect equipment data",
+      submitting: false,
+    });
+    return;
+  }
+
+  try {
+    await API.updateEquipment(id, formData);
+    await loadData(state);
+  } catch (err) {
+    state.setModal({
+      error: err.message,
+    });
+  } finally {
+    state.setModal({
+      mode: "create",
+      item: null,
+      submitting: false,
+    });
+  }
+}
+
+export async function updateRoom(state, id, formData) {
+  state.setModal({
+    mode: "edit",
+    item: formData,
+    submitting: true,
+  });
+
+  if (formData.name === "") {
+    state.setModal({
+      error: "incorrect room data",
+      submitting: false,
+    });
+    return;
+  }
+
+  try {
+    await API.updateRoom(id, formData);
+    await loadData(state);
+  } catch (err) {
+    state.setModal({
+      error: err.message,
+    });
+  } finally {
+    state.setModal({
+      mode: "create",
+      item: null,
+      submitting: false,
+    });
+  }
+}
+
+export async function changeModeToUpdateEquipment(state, item) {
+  state.setModal({
+    mode: "edit",
+    item: item,
+    submitting: false,
+  });
+  return;
+}
+
+export async function changeModeToUpdateRoom(state, item) {
+  state.setModal({
+    mode: "edit",
+    item: item,
+    submitting: false,
+  });
+  return;
+}

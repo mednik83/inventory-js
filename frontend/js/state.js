@@ -25,6 +25,7 @@ class State {
   };
 
   getEquipments = () => [...this.#equipments];
+  getEquipmentById = (id) => this.#equipments.find((e) => e.id === id);
   getRooms = () => [...this.#rooms];
   getFilter = () => ({ ...this.#filter });
   getLoading = () => this.#loading;
