@@ -4,11 +4,10 @@ import {
   getQRCode,
   deleteRoom,
   createRoom,
-  writeOffEquipment,
+  writteOffEquipment,
   updateEquipment,
   updateRoom,
-  changeModeToUpdateEquipment,
-  changeModeToUpdateRoom,
+  startEdit,
 } from "./ui.js";
 
 export function render(state) {
@@ -113,12 +112,12 @@ function renderEquipment(state, equipment) {
 
   const writeOffButton = createButton("Write Off");
   writeOffButton.addEventListener("click", () => {
-    writeOffEquipment(state, equipment.id);
+    writteOffEquipment(state, equipment.id);
   });
 
   const updateButton = createButton("Update");
   updateButton.addEventListener("click", () => {
-    changeModeToUpdateEquipment(state, equipment);
+    startEdit(state, equipment);
   });
 
   const getQRCodeButton = createButton("Get QRCode");
@@ -158,7 +157,7 @@ function renderRoom(state, room) {
 
   const updateButton = createButton("Update");
   updateButton.addEventListener("click", () => {
-    changeModeToUpdateRoom(state, room);
+    startEdit(state, room);
     return;
   });
 

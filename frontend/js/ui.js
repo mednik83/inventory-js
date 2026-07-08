@@ -106,7 +106,7 @@ export async function getQRCode(uuid) {
   }
 }
 
-export async function writeOffEquipment(state, id) {
+export async function writteOffEquipment(state, id) {
   if (!confirm("Вы действительно хотите списать оборудование?")) {
     return;
   }
@@ -151,12 +151,6 @@ export async function updateEquipment(state, id, formData) {
 }
 
 export async function updateRoom(state, id, formData) {
-  state.setModal({
-    mode: "edit",
-    item: formData,
-    submitting: true,
-  });
-
   if (formData.name === "") {
     state.setModal({
       error: "incorrect room data",
@@ -164,6 +158,11 @@ export async function updateRoom(state, id, formData) {
     });
     return;
   }
+
+  state.setModal({
+    submitting: true,
+    error: null,
+  });
 
   try {
     await API.updateRoom(id, formData);
@@ -183,16 +182,7 @@ export async function updateRoom(state, id, formData) {
   }
 }
 
-export function changeModeToUpdateEquipment(state, item) {
-  state.setModal({
-    mode: "edit",
-    item: item,
-    submitting: false,
-  });
-  return;
-}
-
-export function changeModeToUpdateRoom(state, item) {
+export function startEdit(state, item) {
   state.setModal({
     mode: "edit",
     item: item,
