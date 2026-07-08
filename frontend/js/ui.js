@@ -17,32 +17,6 @@ export async function loadData(state) {
   }
 }
 
-export async function loadEquipments(state) {
-  state.setError(null);
-  state.setLoading(true);
-  try {
-    const data = await API.getEquipments();
-    state.setEquipments(data);
-  } catch (err) {
-    state.setError(err.message);
-  } finally {
-    state.setLoading(false);
-  }
-}
-
-export async function loadRooms(state) {
-  state.setError(null);
-  state.setLoading(true);
-  try {
-    const data = await API.getRooms();
-    state.setRooms(data);
-  } catch (err) {
-    state.setError(err.message);
-  } finally {
-    state.setLoading(false);
-  }
-}
-
 export async function createEquipment(state, formData) {
   if (formData.name === "" || !formData.status || !formData.room_id) {
     state.setModal({
@@ -112,7 +86,7 @@ export async function deleteEquipment(state, id) {
 }
 
 export async function deleteRoom(state, id) {
-  if (!confirm("Вы действительно хотите удалить команту?")) {
+  if (!confirm("Вы действительно хотите удалить комнату?")) {
     return;
   }
   try {
@@ -128,7 +102,7 @@ export async function getQRCode(uuid) {
     const svg = await API.getQRCode(uuid);
     return svg;
   } catch (err) {
-    throw new Error("Не удалось загрузит QRCode");
+    throw new Error("Не удалось загрузить QRCode");
   }
 }
 
@@ -145,12 +119,6 @@ export async function writeOffEquipment(state, id) {
 }
 
 export async function updateEquipment(state, id, formData) {
-  state.setModal({
-    mode: "edit",
-    item: formData,
-    submitting: true,
-  });
-
   if (formData.name === "" || !formData.status || !formData.room_id) {
     state.setModal({
       error: "incorrect equipment data",
@@ -159,17 +127,24 @@ export async function updateEquipment(state, id, formData) {
     return;
   }
 
+  state.setModal({
+    submitting: true,
+    error: null,
+  });
+
   try {
     await API.updateEquipment(id, formData);
     await loadData(state);
+    state.setModal({
+      mode: "create",
+      item: null,
+    });
   } catch (err) {
     state.setModal({
       error: err.message,
     });
   } finally {
     state.setModal({
-      mode: "create",
-      item: null,
       submitting: false,
     });
   }
@@ -193,20 +168,22 @@ export async function updateRoom(state, id, formData) {
   try {
     await API.updateRoom(id, formData);
     await loadData(state);
+    state.setModal({
+      mode: "create",
+      item: null,
+    });
   } catch (err) {
     state.setModal({
       error: err.message,
     });
   } finally {
     state.setModal({
-      mode: "create",
-      item: null,
       submitting: false,
     });
   }
 }
 
-export async function changeModeToUpdateEquipment(state, item) {
+export function changeModeToUpdateEquipment(state, item) {
   state.setModal({
     mode: "edit",
     item: item,
@@ -215,7 +192,7 @@ export async function changeModeToUpdateEquipment(state, item) {
   return;
 }
 
-export async function changeModeToUpdateRoom(state, item) {
+export function changeModeToUpdateRoom(state, item) {
   state.setModal({
     mode: "edit",
     item: item,

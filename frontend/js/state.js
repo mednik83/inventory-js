@@ -46,7 +46,6 @@ class State {
       submitting: false,
       error: null,
     });
-    this.#notify();
   };
 
   setRooms = (rooms) => {
