@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-function EquipmentForm({ rooms, handleEquipmentForm }) {
+function EquipmentForm({ rooms, handleEquipmentForm, editingEquipment }) {
   const [name, setName] = useState("");
   const [status, setStatus] = useState("active");
   const [roomId, setRoomId] = useState("");
+
+  useEffect(() => {
+    if (editingEquipment) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setName(editingEquipment.name);
+      setStatus(editingEquipment.status);
+      setRoomId(editingEquipment.room_id);
+    }
+  }, [editingEquipment]);
 
   const handleSubmit = (e) => {
     e.preventDefault();

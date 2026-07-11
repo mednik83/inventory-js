@@ -6,12 +6,15 @@ import EquipmentList from "./components/EquipmentList/EquipmentList";
 import EquipmentForm from "./components/EquipmentForm/EquipmentForm";
 import RoomForm from "./components/RoomForm/RoomForm";
 import Spinner from "./components/Spinner/Spinner";
+import RoomList from "./components/RoomList/RoomList";
 
 function App() {
   const [equipments, setEquipments] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [editingRoom, setEditingRoom] = useState(null);
+  const [editingEquipment, setEditingEquipment] = useState(null);
 
   const loadData = async () => {
     const [equipments, rooms] = await Promise.all([
@@ -36,11 +39,16 @@ function App() {
     init();
   }, []);
 
-  const handleRoomForm = async (name) => {
+  const handleRoomForm = async (formData) => {
     setLoading(true);
     try {
-      await API.createRoom({ name: name });
+      if (editingRoom) {
+        await API.updateRoom(editingRoom.id, formData);
+      } else {
+        await API.createRoom(formData);
+      }
       await loadData();
+      setEditingRoom(null);
       setError("");
     } catch (err) {
       setError(err.message);
@@ -52,8 +60,13 @@ function App() {
   const handleEquipmentForm = async (formData) => {
     setLoading(true);
     try {
-      await API.createEquipment(formData);
+      if (editingEquipment) {
+        await API.updateEquipment(editingEquipment.id, formData);
+      } else {
+        await API.createEquipment(formData);
+      }
       await loadData();
+      setEditingEquipment(null);
       setError("");
     } catch (err) {
       setError(err.message);
@@ -75,21 +88,54 @@ function App() {
     }
   };
 
+  const handleDeleteRoom = async (id) => {
+    setLoading(true);
+    try {
+      await API.deleteRoom(id);
+      await loadData();
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const startEditRoom = (room) => {
+    return setEditingRoom(room);
+  };
+
+  const startEditingEquipment = (equipment) => {
+    return setEditingEquipment(equipment);
+  };
+
   return (
     <>
       <div>
         <h1>Inventory</h1>
       </div>
-      <EquipmentForm rooms={rooms} handleEquipmentForm={handleEquipmentForm} />
-      <RoomForm handleRoomForm={handleRoomForm} />
+      <EquipmentForm
+        rooms={rooms}
+        handleEquipmentForm={handleEquipmentForm}
+        editingEquipment={editingEquipment}
+      />
+      <RoomForm handleRoomForm={handleRoomForm} editingRoom={editingRoom} />
       {error !== "" ? <span className="error">{error}</span> : null}
       {loading ? (
         <Spinner />
       ) : (
-        <EquipmentList
-          equipments={equipments}
-          onDelete={handleDeleteEquipment}
-        />
+        <div className="content">
+          <EquipmentList
+            equipments={equipments}
+            onDelete={handleDeleteEquipment}
+            onEdit={startEditingEquipment}
+          />
+          <RoomList
+            rooms={rooms}
+            onDelete={handleDeleteRoom}
+            onEdit={startEditRoom}
+          />
+        </div>
       )}
     </>
   );

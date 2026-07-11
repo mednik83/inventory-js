@@ -1,6 +1,6 @@
 import EquipmentCard from "../EquipmentCard/EquipmentCard";
 
-function EquipmentList({ equipments, onDelete }) {
+function EquipmentList({ equipments, onDelete, onEdit }) {
   return (
     <div className="list">
       {equipments.map((equipment) => (
@@ -8,6 +8,7 @@ function EquipmentList({ equipments, onDelete }) {
           key={equipment.id}
           equipment={equipment}
           onDelete={onDelete}
+          onEdit={onEdit}
         />
       ))}
     </div>

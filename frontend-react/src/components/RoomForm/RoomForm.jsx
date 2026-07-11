@@ -1,14 +1,25 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-function RoomForm({ handleRoomForm }) {
+function RoomForm({ handleRoomForm, editingRoom }) {
   const [name, setName] = useState("");
+
+  useEffect(() => {
+    if (editingRoom) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setName(editingRoom.name);
+    }
+  }, [editingRoom]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!name) return;
 
-    handleRoomForm(name);
+    const formData = {
+      name: name,
+    };
+
+    handleRoomForm(formData);
 
     setName("");
   };
