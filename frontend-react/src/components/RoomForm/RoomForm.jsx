@@ -7,6 +7,8 @@ function RoomForm({ handleRoomForm, editingRoom }) {
     if (editingRoom) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(editingRoom.name);
+    } else {
+      setName("");
     }
   }, [editingRoom]);
 
@@ -32,7 +34,14 @@ function RoomForm({ handleRoomForm, editingRoom }) {
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
-      <button>Send</button>
+      {editingRoom ? (
+        <>
+          <button>Update</button>
+          <button>Cancel</button>
+        </>
+      ) : (
+        <button>Send</button>
+      )}
     </form>
   );
 }

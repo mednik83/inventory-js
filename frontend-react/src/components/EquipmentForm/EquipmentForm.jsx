@@ -11,6 +11,10 @@ function EquipmentForm({ rooms, handleEquipmentForm, editingEquipment }) {
       setName(editingEquipment.name);
       setStatus(editingEquipment.status);
       setRoomId(editingEquipment.room_id);
+    } else {
+      setName("");
+      setStatus("active");
+      setRoomId("");
     }
   }, [editingEquipment]);
 
@@ -66,7 +70,14 @@ function EquipmentForm({ rooms, handleEquipmentForm, editingEquipment }) {
           );
         })}
       </select>
-      <button>Send</button>
+      {editingEquipment ? (
+        <>
+          <button>Update</button>
+          <button>Cancel</button>
+        </>
+      ) : (
+        <button>Send</button>
+      )}
     </form>
   );
 }

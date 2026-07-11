@@ -1,8 +1,11 @@
+import { Link } from "react-router-dom";
+import "./Nav.css";
+
 function Nav() {
   return (
     <nav className="navbar">
-      <a href="#">equipments</a>
-      <a href="#">rooms</a>
+      <Link to="/equipments">equipments</Link>
+      <Link to="/rooms">rooms</Link>
     </nav>
   );
 }

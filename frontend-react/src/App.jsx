@@ -7,6 +7,8 @@ import EquipmentForm from "./components/EquipmentForm/EquipmentForm";
 import RoomForm from "./components/RoomForm/RoomForm";
 import Spinner from "./components/Spinner/Spinner";
 import RoomList from "./components/RoomList/RoomList";
+import Nav from "./components/Nav/Nav";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   const [equipments, setEquipments] = useState([]);
@@ -102,11 +104,11 @@ function App() {
   };
 
   const startEditRoom = (room) => {
-    return setEditingRoom(room);
+    setEditingRoom(room);
   };
 
-  const startEditingEquipment = (equipment) => {
-    return setEditingEquipment(equipment);
+  const startEditEquipment = (equipment) => {
+    setEditingEquipment(equipment);
   };
 
   return (
@@ -114,29 +116,55 @@ function App() {
       <div>
         <h1>Inventory</h1>
       </div>
-      <EquipmentForm
-        rooms={rooms}
-        handleEquipmentForm={handleEquipmentForm}
-        editingEquipment={editingEquipment}
-      />
-      <RoomForm handleRoomForm={handleRoomForm} editingRoom={editingRoom} />
-      {error !== "" ? <span className="error">{error}</span> : null}
-      {loading ? (
-        <Spinner />
-      ) : (
-        <div className="content">
-          <EquipmentList
-            equipments={equipments}
-            onDelete={handleDeleteEquipment}
-            onEdit={startEditingEquipment}
-          />
-          <RoomList
-            rooms={rooms}
-            onDelete={handleDeleteRoom}
-            onEdit={startEditRoom}
-          />
-        </div>
-      )}
+      <Nav />
+
+      <Routes>
+        <Route
+          path="/equipments"
+          element={
+            <>
+              <EquipmentForm
+                rooms={rooms}
+                handleEquipmentForm={handleEquipmentForm}
+                editingEquipment={editingEquipment}
+              />
+              {error !== "" ? <span className="error">{error}</span> : null}
+              {loading ? (
+                <Spinner />
+              ) : (
+                <EquipmentList
+                  equipments={equipments}
+                  onDelete={handleDeleteEquipment}
+                  onEdit={startEditEquipment}
+                  editingEquipment={editingEquipment}
+                />
+              )}
+            </>
+          }
+        ></Route>
+        <Route
+          path="/rooms"
+          element={
+            <>
+              <RoomForm
+                handleRoomForm={handleRoomForm}
+                editingRoom={editingRoom}
+              />
+              {error !== "" ? <span className="error">{error}</span> : null}
+              {loading ? (
+                <Spinner />
+              ) : (
+                <RoomList
+                  rooms={rooms}
+                  onDelete={handleDeleteRoom}
+                  onEdit={startEditRoom}
+                  editingRoom={editingRoom}
+                />
+              )}
+            </>
+          }
+        ></Route>
+      </Routes>
     </>
   );
 }
