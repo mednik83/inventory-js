@@ -1,4 +1,15 @@
 .navbar {
+  padding: 20px 0;
   display: flex;
   gap: 20px;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+}
+
+.navbar a.active {
+  font-weight: bold;
+  border-bottom: 2px solid white;
 }

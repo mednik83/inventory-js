@@ -1,9 +1,20 @@
+import "./RoomCard.css";
+
 function RoomCard({ room, onDelete, onEdit }) {
   return (
-    <div className="card">
-      <h2>{room.name}</h2>
-      <button onClick={() => onDelete(room.id)}>Delete</button>
-      <button onClick={() => onEdit(room)}>Edit</button>
+    <div className="room-card">
+      <h2>
+        <b>Room name: </b> {room.name}
+      </h2>
+      <div className="buttons">
+        {" "}
+        <button className="danger" onClick={() => onDelete(room.id)}>
+          Delete
+        </button>
+        <button className="primary" onClick={() => onEdit(room)}>
+          Edit
+        </button>
+      </div>
     </div>
   );
 }

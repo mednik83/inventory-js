@@ -1,10 +1,64 @@
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-    background: black;
-    color: white;
+  font-size: 16px;
+  background: rgb(40, 40, 40);
+  color: white;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* buttons */
+button {
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  border-radius: 10px;
+}
+
+button:hover {
+  transform: scale(1.05);
+  transition: ease 0.2s;
+}
+
+.primary {
+  color: #fff;
+  background: rgb(60, 60, 255);
+}
+
+.warning {
+  color: #fff;
+  background: rgb(225, 225, 0);
+}
+
+.success {
+  color: #fff;
+  background: rgb(30, 160, 30);
+}
+
+.danger {
+  color: #fff;
+  background: rgb(255, 40, 40);
+}
+
+.error {
+  color: red;
+}
+
+.form_input {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+input,
+select,
+button {
+  padding: 10px 10px;
+  color: black;
+  font-weight: bold;
 }

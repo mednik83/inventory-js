@@ -1,12 +1,28 @@
+import "./EquipmentCard.css";
+
 function EquipmentCard({ equipment, onDelete, onEdit }) {
   return (
-    <div className="elem">
-      <h1>{equipment.name}</h1>
-      <p>{equipment.room_name}</p>
-      <p>{equipment.status}</p>
-      <p>{equipment.uuid}</p>
-      <button onClick={() => onDelete(equipment.id)}>Delete</button>
-      <button onClick={() => onEdit(equipment)}>Edit</button>
+    <div className="equipment-card">
+      <h2>
+        <b>Equipment name:</b> {equipment.name}
+      </h2>
+      <p>
+        <b>Room name:</b> {equipment.room_name}
+      </p>
+      <p>
+        <b>Equipment status:</b> {equipment.status}
+      </p>
+      <p>
+        <b>Equipment uuid:</b> {equipment.uuid}
+      </p>
+      <div className="buttons">
+        <button className="danger" onClick={() => onDelete(equipment.id)}>
+          Delete
+        </button>
+        <button className="primary" onClick={() => onEdit(equipment)}>
+          Edit
+        </button>
+      </div>
     </div>
   );
 }

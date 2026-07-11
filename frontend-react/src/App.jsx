@@ -2,13 +2,11 @@ import "./App.css";
 import API from "./api/client";
 import { useEffect, useState } from "react";
 
-import EquipmentList from "./components/EquipmentList/EquipmentList";
-import EquipmentForm from "./components/EquipmentForm/EquipmentForm";
-import RoomForm from "./components/RoomForm/RoomForm";
-import Spinner from "./components/Spinner/Spinner";
-import RoomList from "./components/RoomList/RoomList";
 import Nav from "./components/Nav/Nav";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import EquipmentPage from "./pages/EquipmentPage/EquipmentPage";
+import RoomPage from "./pages/RoomPage/RoomPage";
+import NotFoundPage from "./pages/404/404";
 
 function App() {
   const [equipments, setEquipments] = useState([]);
@@ -112,60 +110,48 @@ function App() {
   };
 
   return (
-    <>
-      <div>
+    <div className="app">
+      <div className="header">
         <h1>Inventory</h1>
       </div>
       <Nav />
 
-      <Routes>
-        <Route
-          path="/equipments"
-          element={
-            <>
-              <EquipmentForm
+      <div className="content">
+        <Routes>
+          <Route path="/" element={<Navigate to="/equipments" replace />} />
+          <Route
+            path="/equipments"
+            element={
+              <EquipmentPage
                 rooms={rooms}
                 handleEquipmentForm={handleEquipmentForm}
                 editingEquipment={editingEquipment}
+                equipments={equipments}
+                handleDeleteEquipment={handleDeleteEquipment}
+                startEditEquipment={startEditEquipment}
+                error={error}
+                loading={loading}
               />
-              {error !== "" ? <span className="error">{error}</span> : null}
-              {loading ? (
-                <Spinner />
-              ) : (
-                <EquipmentList
-                  equipments={equipments}
-                  onDelete={handleDeleteEquipment}
-                  onEdit={startEditEquipment}
-                  editingEquipment={editingEquipment}
-                />
-              )}
-            </>
-          }
-        ></Route>
-        <Route
-          path="/rooms"
-          element={
-            <>
-              <RoomForm
+            }
+          />
+          <Route
+            path="/rooms"
+            element={
+              <RoomPage
                 handleRoomForm={handleRoomForm}
                 editingRoom={editingRoom}
+                error={error}
+                loading={loading}
+                rooms={rooms}
+                handleDeleteRoom={handleDeleteRoom}
+                startEditRoom={startEditRoom}
               />
-              {error !== "" ? <span className="error">{error}</span> : null}
-              {loading ? (
-                <Spinner />
-              ) : (
-                <RoomList
-                  rooms={rooms}
-                  onDelete={handleDeleteRoom}
-                  onEdit={startEditRoom}
-                  editingRoom={editingRoom}
-                />
-              )}
-            </>
-          }
-        ></Route>
-      </Routes>
-    </>
+            }
+          />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </div>
+    </div>
   );
 }
 export default App;

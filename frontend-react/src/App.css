@@ -1,0 +1,14 @@
+.app {
+  width: 100%;
+  width: 1024px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  padding: 40px;
+}
+
+.content {
+  margin-bottom: 20px;
+}

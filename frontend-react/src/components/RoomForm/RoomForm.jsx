@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./RoomForm.css";
 
 function RoomForm({ handleRoomForm, editingRoom }) {
   const [name, setName] = useState("");
@@ -27,20 +28,25 @@ function RoomForm({ handleRoomForm, editingRoom }) {
   };
 
   return (
-    <form className="roomForm" onSubmit={handleSubmit}>
-      <input
-        name="name"
-        placeholder="Room name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
+    <form className="room-form" onSubmit={handleSubmit}>
+      <div className="form_input">
+        <label htmlFor="room-name"></label>
+        <input
+          id="room-name"
+          name="name"
+          placeholder="Room name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
+
       {editingRoom ? (
-        <>
-          <button>Update</button>
-          <button>Cancel</button>
-        </>
+        <div className="buttons">
+          <button className="primary">Update</button>
+          <button className="warning">Cancel</button>
+        </div>
       ) : (
-        <button>Send</button>
+        <button className="success">Send</button>
       )}
     </form>
   );

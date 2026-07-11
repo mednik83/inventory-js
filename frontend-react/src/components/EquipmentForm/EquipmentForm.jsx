@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "./EquipmentForm.css";
 
 function EquipmentForm({ rooms, handleEquipmentForm, editingEquipment }) {
   const [name, setName] = useState("");
@@ -37,46 +38,58 @@ function EquipmentForm({ rooms, handleEquipmentForm, editingEquipment }) {
   };
 
   return (
-    <form className="form" onSubmit={handleSubmit}>
-      <input
-        onChange={(e) => setName(e.target.value)}
-        type="text"
-        value={name}
-        placeholder="name"
-        name="name"
-      />
-      <select
-        name="status"
-        onChange={(e) => setStatus(e.target.value)}
-        value={status}
-      >
-        <option value={"active"}>active</option>
-        <option value={"inactive"}>inactive</option>
-        <option value={"written_off"}>written off</option>
-      </select>
-      <select
-        name="room_id"
-        onChange={(e) => setRoomId(e.target.value)}
-        value={roomId}
-      >
-        <option value="" disabled hidden>
-          Select Room
-        </option>
-        {rooms.map((room) => {
-          return (
-            <option key={room.id} value={room.id}>
-              {room.name}
-            </option>
-          );
-        })}
-      </select>
+    <form className="equipment-form" onSubmit={handleSubmit}>
+      <div className="form_input">
+        <label htmlFor="equipment-name">Equipment name</label>
+        <input
+          onChange={(e) => setName(e.target.value)}
+          type="text"
+          id="equipment-name"
+          value={name}
+          placeholder="name"
+          name="name"
+        />
+      </div>
+      <div className="form_input">
+        <label htmlFor="equipment-status">Equipment status</label>
+        <select
+          id="equipment-status"
+          name="status"
+          onChange={(e) => setStatus(e.target.value)}
+          value={status}
+        >
+          <option value={"active"}>active</option>
+          <option value={"inactive"}>inactive</option>
+          <option value={"written_off"}>written off</option>
+        </select>
+      </div>
+      <div className="form_input">
+        <label htmlFor="equipment-room_id">Equipment room</label>
+        <select
+          id="equipment-room_id"
+          name="room_id"
+          onChange={(e) => setRoomId(e.target.value)}
+          value={roomId}
+        >
+          <option value="" disabled hidden>
+            Select Room
+          </option>
+          {rooms.map((room) => {
+            return (
+              <option key={room.id} value={room.id}>
+                {room.name}
+              </option>
+            );
+          })}
+        </select>
+      </div>
       {editingEquipment ? (
-        <>
-          <button>Update</button>
-          <button>Cancel</button>
-        </>
+        <div className="buttons">
+          <button className="primary">Update</button>
+          <button className="warning">Cancel</button>
+        </div>
       ) : (
-        <button>Send</button>
+        <button className="success">Send</button>
       )}
     </form>
   );
