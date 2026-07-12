@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import "./EquipmentForm.css";
 
-function EquipmentForm({ rooms, handleEquipmentForm, editingEquipment }) {
+function EquipmentForm({
+  rooms,
+  handleEquipmentForm,
+  editingEquipment,
+  startEditEquipment,
+}) {
   const [name, setName] = useState("");
   const [status, setStatus] = useState("active");
   const [roomId, setRoomId] = useState("");
@@ -86,7 +91,9 @@ function EquipmentForm({ rooms, handleEquipmentForm, editingEquipment }) {
       {editingEquipment ? (
         <div className="buttons">
           <button className="primary">Update</button>
-          <button className="warning">Cancel</button>
+          <button className="warning" onClick={() => startEditEquipment(null)}>
+            Cancel
+          </button>
         </div>
       ) : (
         <button className="success">Send</button>

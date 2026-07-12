@@ -1,6 +1,7 @@
 import EquipmentList from "../../components/EquipmentList/EquipmentList";
 import EquipmentForm from "../../components/EquipmentForm/EquipmentForm";
 import Spinner from "../../components/Spinner/Spinner";
+import Search from "../../components/Search/Search";
 
 function EquipmentPage({
   rooms,
@@ -11,6 +12,8 @@ function EquipmentPage({
   startEditEquipment,
   error,
   loading,
+  searchQuery,
+  setSearchQuery,
 }) {
   return (
     <>
@@ -18,7 +21,10 @@ function EquipmentPage({
         rooms={rooms}
         handleEquipmentForm={handleEquipmentForm}
         editingEquipment={editingEquipment}
+        startEditEquipment={startEditEquipment}
       />
+      <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+
       {error !== "" ? <span className="error">{error}</span> : null}
       {loading ? (
         <Spinner />
@@ -26,10 +32,9 @@ function EquipmentPage({
         <h2>No content</h2>
       ) : (
         <EquipmentList
-          equipments={equipments}
           onDelete={handleDeleteEquipment}
           onEdit={startEditEquipment}
-          editingEquipment={editingEquipment}
+          equipments={equipments}
         />
       )}
     </>

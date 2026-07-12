@@ -13,7 +13,11 @@ function RoomPage({
 }) {
   return (
     <>
-      <RoomForm handleRoomForm={handleRoomForm} editingRoom={editingRoom} />
+      <RoomForm
+        handleRoomForm={handleRoomForm}
+        editingRoom={editingRoom}
+        startEditRoom={startEditRoom}
+      />
       {error !== "" ? <span className="error">{error}</span> : null}
       {loading ? (
         <Spinner />

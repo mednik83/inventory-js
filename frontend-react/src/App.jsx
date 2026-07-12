@@ -1,6 +1,6 @@
 import "./App.css";
 import API from "./api/client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Nav from "./components/Nav/Nav";
 import { Navigate, Route, Routes } from "react-router-dom";
@@ -15,6 +15,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [editingRoom, setEditingRoom] = useState(null);
   const [editingEquipment, setEditingEquipment] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const loadData = async () => {
     const [equipments, rooms] = await Promise.all([
@@ -38,6 +39,14 @@ function App() {
     };
     init();
   }, []);
+
+  const filteredEquipments = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      return equipments;
+    }
+    return equipments.filter((eq) => eq.name.toLowerCase().includes(query));
+  }, [equipments, searchQuery]);
 
   const handleRoomForm = async (formData) => {
     setLoading(true);
@@ -126,11 +135,13 @@ function App() {
                 rooms={rooms}
                 handleEquipmentForm={handleEquipmentForm}
                 editingEquipment={editingEquipment}
-                equipments={equipments}
+                equipments={filteredEquipments}
                 handleDeleteEquipment={handleDeleteEquipment}
                 startEditEquipment={startEditEquipment}
                 error={error}
                 loading={loading}
+                searchQuery={searchQuery}
+                setSearchQuery={setSearchQuery}
               />
             }
           />

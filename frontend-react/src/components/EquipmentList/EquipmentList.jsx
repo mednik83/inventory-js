@@ -1,7 +1,7 @@
 import EquipmentCard from "../EquipmentCard/EquipmentCard";
 import "./EquipmentList.css";
 
-function EquipmentList({ equipments, onDelete, onEdit }) {
+function EquipmentList({ onDelete, onEdit, equipments }) {
   return (
     <div className="equipment-list">
       {equipments.map((equipment) => (

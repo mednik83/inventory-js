@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./RoomForm.css";
 
-function RoomForm({ handleRoomForm, editingRoom }) {
+function RoomForm({ handleRoomForm, editingRoom, startEditRoom }) {
   const [name, setName] = useState("");
 
   useEffect(() => {
@@ -30,7 +30,7 @@ function RoomForm({ handleRoomForm, editingRoom }) {
   return (
     <form className="room-form" onSubmit={handleSubmit}>
       <div className="form_input">
-        <label htmlFor="room-name"></label>
+        <label htmlFor="room-name">Room name</label>
         <input
           id="room-name"
           name="name"
@@ -43,7 +43,9 @@ function RoomForm({ handleRoomForm, editingRoom }) {
       {editingRoom ? (
         <div className="buttons">
           <button className="primary">Update</button>
-          <button className="warning">Cancel</button>
+          <button className="warning" onClick={() => startEditRoom(null)}>
+            Cancel
+          </button>
         </div>
       ) : (
         <button className="success">Send</button>
