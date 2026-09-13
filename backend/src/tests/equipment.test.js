@@ -370,4 +370,16 @@ describe("Equipment API", () => {
         .expect(400);
     });
   });
+
+  describe("delete equipment before room", () => {
+    it("should return 409 when room has equipment", async () => {
+      await request(app).post("/equipments").send({
+        name: testEquipment.name,
+        room_id: firstRoomId,
+        status: testEquipment.status,
+      });
+
+      await request(app).delete(`/rooms/${firstRoomId}`).expect(409);
+    });
+  });
 });
