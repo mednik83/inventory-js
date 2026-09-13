@@ -21,3 +21,9 @@ export class NotFoundError extends AppError {
     super(message, 404);
   }
 }
+
+export class ConflictError extends AppError {
+  constructor(message = "Conflict error") {
+    super(message, 409);
+  }
+}

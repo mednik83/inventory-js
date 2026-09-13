@@ -1,6 +1,10 @@
 import { ValidationError } from "../errors/errors.js";
 import { operationRepository } from "../repositories/operation.repository.js";
-import { ALLOWED_OPERATIONS, Operation, OperationType } from "../types.js";
+import {
+  ALLOWED_OPERATIONS,
+  type Operation,
+  type OperationType,
+} from "../types.js";
 import { validateId } from "../utils/validate-id.js";
 
 function isOperationType(value: string): value is OperationType {
@@ -40,7 +44,7 @@ class OperationService {
     });
   }
 
-  getByEquipmentId(equipmentId: number) {
+  getByEquipmentId(equipmentId: unknown) {
     const validEquipmentId = validateId(equipmentId);
     return operationRepository.getByEquipmentId(validEquipmentId);
   }

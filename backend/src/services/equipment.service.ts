@@ -7,7 +7,11 @@ import { v4 as uuidv4 } from "uuid";
 import { validateUuid } from "../utils/validate-uuid.js";
 import { operationService } from "./operation.service.js";
 import { operationRepository } from "../repositories/operation.repository.js";
-import { Equipment, EquipmentFilters, EquipmentFormData } from "../types.js";
+import type {
+  Equipment,
+  EquipmentFilters,
+  EquipmentFormData,
+} from "../types.js";
 
 function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
   if (typeof data !== "object" || data === null) {
@@ -38,7 +42,7 @@ function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
 }
 
 class EquipmentService {
-  getById(id: number) {
+  getById(id: unknown) {
     const equipmentId = validateId(id);
     const equipment = equipmentRepository.findById(equipmentId);
 
@@ -49,7 +53,7 @@ class EquipmentService {
     return equipment;
   }
 
-  getByUuid(uuid: string) {
+  getByUuid(uuid: unknown) {
     const equipmentUuid = validateUuid(uuid);
     const equipment = equipmentRepository.findByUuid(equipmentUuid);
 
@@ -64,7 +68,7 @@ class EquipmentService {
     return equipmentRepository.findAll(filters);
   }
 
-  create(data: EquipmentFormData) {
+  create(data: unknown) {
     const validData = validateEquipment(data);
 
     roomService.getById(validData.room_id);
@@ -89,7 +93,7 @@ class EquipmentService {
     return newEquipment;
   }
 
-  update(id: number, data: EquipmentFormData) {
+  update(id: unknown, data: unknown) {
     const equipmentId = validateId(id);
 
     const validData = validateEquipment(data);
@@ -116,7 +120,7 @@ class EquipmentService {
     return equipment;
   }
 
-  writtenOff(id: number) {
+  writtenOff(id: unknown) {
     const equipmentId = validateId(id);
     const equipment = this.getById(equipmentId);
 
@@ -138,7 +142,7 @@ class EquipmentService {
     return true;
   }
 
-  forceDelete(id: number) {
+  forceDelete(id: unknown) {
     const equipmentId = validateId(id);
     this.getById(equipmentId); // validate id
 

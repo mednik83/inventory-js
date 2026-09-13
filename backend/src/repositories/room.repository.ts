@@ -2,7 +2,7 @@ import db from "../database/db.js";
 import { Room } from "../types.js";
 
 class RoomRepository {
-  findAll(limit: number = 0) {
+  findAll(limit: number = 0): Room[] {
     if (limit > 0) {
       return db
         .prepare(
@@ -11,7 +11,7 @@ class RoomRepository {
         LIMIT ?
         `,
         )
-        .all(limit);
+        .all(limit) as Room[];
     }
     return db
       .prepare(
@@ -19,7 +19,7 @@ class RoomRepository {
     SELECT * FROM rooms
     `,
       )
-      .all();
+      .all() as Room[];
   }
 
   findByName(name: string) {
@@ -33,7 +33,7 @@ class RoomRepository {
       .get(name);
   }
 
-  findById(id: number) {
+  findById(id: number): Room | undefined {
     return db
       .prepare(
         `
@@ -41,7 +41,7 @@ class RoomRepository {
       WHERE id = ?
       `,
       )
-      .get(id);
+      .get(id) as Room | undefined;
   }
 
   create(room: Omit<Room, "id">) {

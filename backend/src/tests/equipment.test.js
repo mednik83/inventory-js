@@ -2,7 +2,6 @@ import request from "supertest";
 import assert from "node:assert/strict";
 import { app } from "../app.js";
 import db from "../database/db.js";
-import { describe } from "node:test";
 
 describe("Equipment API", () => {
   let firstRoomId;
