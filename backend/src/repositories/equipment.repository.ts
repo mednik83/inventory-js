@@ -1,7 +1,12 @@
+import type {
+  Equipment,
+  EquipmentFilters,
+  EquipmentWithRoom,
+} from "../types.ts";
 import db from "../database/db.js";
 
 class EquipmentRepository {
-  create(equipment) {
+  create(equipment: Omit<Equipment, "id">): EquipmentWithRoom | undefined {
     const result = db
       .prepare(
         `
@@ -11,10 +16,10 @@ class EquipmentRepository {
       )
       .run(equipment.uuid, equipment.name, equipment.room_id, equipment.status);
 
-    return this.findById(result.lastInsertRowid);
+    return this.findById(Number(result.lastInsertRowid));
   }
 
-  findByUuid(uuid) {
+  findByUuid(uuid: string): EquipmentWithRoom | undefined {
     return db
       .prepare(
         `
@@ -30,10 +35,10 @@ class EquipmentRepository {
       WHERE equipments.uuid = ?
       `,
       )
-      .get(uuid);
+      .get(uuid) as EquipmentWithRoom | undefined;
   }
 
-  findById(id) {
+  findById(id: number): EquipmentWithRoom | undefined {
     return db
       .prepare(
         `
@@ -49,10 +54,10 @@ class EquipmentRepository {
       WHERE equipments.id = ?
       `,
       )
-      .get(id);
+      .get(id) as EquipmentWithRoom | undefined;
   }
 
-  findAll(filters = {}) {
+  findAll(filters: EquipmentFilters = {}): EquipmentWithRoom[] {
     let sql = `
       SELECT
         equipments.id,
@@ -62,11 +67,13 @@ class EquipmentRepository {
         rooms.name AS room_name,
         equipments.status
       FROM equipments
+      JOIN rooms ON rooms.id = equipments.room_id
     `;
-    const conditions = [];
-    const params = [];
 
-    if (filters.roomIds) {
+    const conditions: string[] = [];
+    const params: (string | number)[] = [];
+
+    if (filters.roomIds?.length) {
       const placeholders = filters.roomIds.map(() => "?").join(", ");
       conditions.push(`room_id IN (${placeholders})`);
       params.push(...filters.roomIds);
@@ -78,7 +85,7 @@ class EquipmentRepository {
     }
 
     if (conditions.length > 0) {
-      sql += "WHERE " + conditions.join(" AND ");
+      sql += " WHERE " + conditions.join(" AND ");
     }
 
     if (filters.limit) {
@@ -86,12 +93,10 @@ class EquipmentRepository {
       params.push(filters.limit);
     }
 
-    sql += " JOIN rooms ON rooms.id = equipments.room_id ";
-
-    return db.prepare(sql).all(...params);
+    return db.prepare(sql).all(...params) as EquipmentWithRoom[];
   }
 
-  update(equipment) {
+  update(equipment: Omit<Equipment, "uuid">): number {
     const result = db
       .prepare(
         `
@@ -102,20 +107,18 @@ class EquipmentRepository {
       )
       .run(equipment.name, equipment.room_id, equipment.status, equipment.id);
 
-    return result;
+    return result.changes;
   }
 
-  countByRoomId(roomId) {
-    return db
-      .prepare(
-        `
-      SELECT * FROM equipments
-      WHERE room_id = ?`,
-      )
-      .all(roomId);
+  countByRoomId(roomId: number): number {
+    const row = db
+      .prepare(`SELECT COUNT(*) AS count FROM equipments WHERE room_id = ?`)
+      .get(roomId) as { count: number };
+
+    return row.count;
   }
 
-  deleteById(id) {
+  deleteById(id: number): number {
     return db
       .prepare(
         `
@@ -123,7 +126,7 @@ class EquipmentRepository {
       WHERE id = ?
       `,
       )
-      .run(id);
+      .run(id).changes;
   }
 }
 

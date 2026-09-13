@@ -113,7 +113,7 @@ class EquipmentController {
     try {
       equipmentService.writtenOff(req.params.id);
 
-      return res.status(204).send();
+      return res.status(200).send();
     } catch (error) {
       return handleControllerError(error, res);
     }

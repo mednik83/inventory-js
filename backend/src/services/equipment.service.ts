@@ -7,37 +7,38 @@ import { v4 as uuidv4 } from "uuid";
 import { validateUuid } from "../utils/validate-uuid.js";
 import { operationService } from "./operation.service.js";
 import { operationRepository } from "../repositories/operation.repository.js";
+import { Equipment, EquipmentFilters, EquipmentFormData } from "../types.js";
 
-function validateEquipment(data) {
-  const name = data.name?.trim();
-  const roomIdRaw = data.room_id;
-  const status = data.status?.trim();
-
-  if (!name || !status || roomIdRaw === undefined || roomIdRaw === null) {
+function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
+  if (typeof data !== "object" || data === null) {
     throw new ValidationError("Invalid equipment data");
   }
 
-  validateStatus(status);
+  const { name, room_id, status } = data as Record<string, unknown>;
 
-  if (name.length < 2) {
+  if (typeof name !== "string" || typeof status !== "string") {
+    throw new ValidationError("Invalid equipment data");
+  }
+
+  const trimmedName = name.trim();
+  if (trimmedName.length < 2) {
     throw new ValidationError("The name is too short");
   }
 
-  const room_id = Number(roomIdRaw);
-
-  if (!Number.isInteger(room_id) || room_id <= 0) {
+  const roomId = Number(room_id);
+  if (!Number.isInteger(roomId) || roomId <= 0) {
     throw new ValidationError("The room id must be a positive integer");
   }
 
   return {
-    name,
-    room_id,
-    status,
+    name: trimmedName,
+    room_id: roomId,
+    status: validateStatus(status.trim()),
   };
 }
 
 class EquipmentService {
-  getById(id) {
+  getById(id: number) {
     const equipmentId = validateId(id);
     const equipment = equipmentRepository.findById(equipmentId);
 
@@ -48,7 +49,7 @@ class EquipmentService {
     return equipment;
   }
 
-  getByUuid(uuid) {
+  getByUuid(uuid: string) {
     const equipmentUuid = validateUuid(uuid);
     const equipment = equipmentRepository.findByUuid(equipmentUuid);
 
@@ -59,32 +60,36 @@ class EquipmentService {
     return equipment;
   }
 
-  getAll(filters) {
+  getAll(filters: EquipmentFilters) {
     return equipmentRepository.findAll(filters);
   }
 
-  create(data) {
+  create(data: EquipmentFormData) {
     const validData = validateEquipment(data);
 
     roomService.getById(validData.room_id);
 
-    const equipment = {
+    const equipment: Omit<Equipment, "id"> = {
       uuid: uuidv4(),
       ...validData,
     };
 
     const newEquipment = equipmentRepository.create(equipment);
 
-    operationService.create(
-      newEquipment.id,
-      "created",
-      `Equipment "${newEquipment.name}" created`,
-    );
+    if (!newEquipment) {
+      throw new Error("Не удалось создать оборудование");
+    }
+
+    operationService.create({
+      equipment_id: newEquipment.id,
+      type: "create",
+      comment: `Equipment "${newEquipment.name}" created`,
+    });
 
     return newEquipment;
   }
 
-  update(id, data) {
+  update(id: number, data: EquipmentFormData) {
     const equipmentId = validateId(id);
 
     const validData = validateEquipment(data);
@@ -98,24 +103,24 @@ class EquipmentService {
 
     const result = equipmentRepository.update(equipment);
 
-    if (result.changes === 0) {
+    if (result === 0) {
       throw new NotFoundError("Equipment not found");
     }
 
-    operationService.create(
-      equipment.id,
-      "updated",
-      `Equipment "${equipment.name}" updated`,
-    );
+    operationService.create({
+      equipment_id: equipment.id,
+      type: "update",
+      comment: `Equipment "${equipment.name}" created`,
+    });
 
     return equipment;
   }
 
-  writtenOff(id) {
+  writtenOff(id: number) {
     const equipmentId = validateId(id);
     const equipment = this.getById(equipmentId);
 
-    const equipmentData = {
+    const equipmentData: Omit<Equipment, "uuid"> = {
       id: equipmentId,
       name: equipment.name,
       room_id: equipment.room_id,
@@ -124,18 +129,18 @@ class EquipmentService {
 
     equipmentRepository.update(equipmentData);
 
-    operationService.create(
-      equipmentId,
-      "written_off",
-      `Equipment with id=${equipmentId} was written_off`,
-    );
+    operationService.create({
+      equipment_id: equipmentId,
+      type: "write_off",
+      comment: `Equipment with id=${equipmentId} was written_off`,
+    });
 
     return true;
   }
 
-  forceDelete(id) {
+  forceDelete(id: number) {
     const equipmentId = validateId(id);
-    this.getById(id); // validate id
+    this.getById(equipmentId); // validate id
 
     operationRepository.deleteByEquipmentId(equipmentId);
 

@@ -23,11 +23,11 @@ equipmentRouter.put("/:id", (req, res) => {
   equipmentController.update(req, res);
 });
 
-equipmentRouter.patch("/:id", (req, res) => {
+equipmentRouter.post("/:id/write-off", (req, res) => {
   equipmentController.writeOff(req, res);
 });
 
-equipmentRouter.delete("/:id/delete", (req, res) => {
+equipmentRouter.delete("/:id", (req, res) => {
   equipmentController.forceDelete(req, res);
 });
 

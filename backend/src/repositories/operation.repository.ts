@@ -1,8 +1,9 @@
 import db from "../database/db.js";
+import { Operation } from "../types.js";
 
 class OperationRepository {
-  create(equipmentId, type, comment = null) {
-    if (!comment) {
+  create(operation: Pick<Operation, "equipment_id" | "type" | "comment">) {
+    if (!operation.comment) {
       return db
         .prepare(
           `
@@ -10,7 +11,7 @@ class OperationRepository {
         VALUES (?, ?)
         `,
         )
-        .run(equipmentId, type);
+        .run(operation.equipment_id, operation.type);
     }
     return db
       .prepare(
@@ -19,10 +20,10 @@ class OperationRepository {
       VALUES (?, ?, ?)
       `,
       )
-      .run(equipmentId, type, comment);
+      .run(operation.equipment_id, operation.type, operation.comment);
   }
 
-  getByEquipmentId(equipmentId) {
+  getByEquipmentId(equipmentId: number) {
     return db
       .prepare(
         `
@@ -33,7 +34,7 @@ class OperationRepository {
       .all(equipmentId);
   }
 
-  deleteByEquipmentId(equipmentId) {
+  deleteByEquipmentId(equipmentId: number) {
     return db
       .prepare(
         `

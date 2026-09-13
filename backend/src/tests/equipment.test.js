@@ -2,6 +2,7 @@ import request from "supertest";
 import assert from "node:assert/strict";
 import { app } from "../app.js";
 import db from "../database/db.js";
+import { describe } from "node:test";
 
 describe("Equipment API", () => {
   let firstRoomId;
@@ -27,6 +28,13 @@ describe("Equipment API", () => {
       .expect(201);
 
     secondRoomId = secondRoomRes.body.id;
+  });
+
+  const makeEquipment = (overrides = {}) => ({
+    name: "Printer",
+    room_id: firstRoomId,
+    status: "active",
+    ...overrides,
   });
 
   const testEquipment = {
@@ -263,21 +271,21 @@ describe("Equipment API", () => {
 
       const id = createRes.body.id;
 
-      await request(app).delete(`/equipments/${id}/delete`).expect(204);
+      await request(app).delete(`/equipments/${id}`).expect(204);
 
       await request(app).get(`/equipments/${id}`).expect(404);
     });
 
     it("should return 400 for invalid id on delete", async () => {
       await request(app)
-        .delete("/equipments/abc/delete")
+        .delete("/equipments/abc")
         .expect("Content-Type", /json/)
         .expect(400);
     });
 
     it("should return 404 if equipment does not exist on delete", async () => {
       await request(app)
-        .delete("/equipments/9999999999/delete")
+        .delete("/equipments/9999999999")
         .expect("Content-Type", /json/)
         .expect(404);
     });
@@ -313,26 +321,54 @@ describe("Equipment API", () => {
       assert.strictEqual(getRes.body.room_id, firstRoomId);
       assert.strictEqual(getRes.body.status, testEquipment.status);
 
-      const putEquipment = {
-        name: "updated",
-        room_id: secondRoomId,
-        status: "inactive",
-      };
+      await request(app).post(`/equipments/${id}/write-off`).expect(200);
 
-      const putRes = await request(app)
-        .put(`/equipments/${id}`)
-        .send(putEquipment)
-        .expect("Content-Type", /json/)
-        .expect(200);
+      const afterRes = await request(app).get(`/equipments/${id}`).expect(200);
 
-      assert.strictEqual(putRes.body.id, id);
-      assert.strictEqual(putRes.body.name, putEquipment.name);
-      assert.strictEqual(putRes.body.room_id, putEquipment.room_id);
-      assert.strictEqual(putRes.body.status, putEquipment.status);
+      assert.strictEqual(afterRes.body.status, "written_off");
 
-      await request(app).delete(`/equipments/${id}/delete`).expect(204);
+      await request(app).delete(`/equipments/${id}`).expect(204);
 
       await request(app).get(`/equipments/${id}`).expect(404);
+    });
+  });
+
+  describe("logs, filter, spaces", () => {
+    it("should log create operation", async () => {
+      const { body: eq } = await request(app)
+        .post("/equipments")
+        .send(makeEquipment())
+        .expect(201);
+
+      const { body: operations } = await request(app)
+        .get(`/operations?equipment_id=${eq.id}`)
+        .expect(200);
+
+      assert.strictEqual(operations.length, 1);
+      assert.strictEqual(operations[0].type, "create");
+    });
+    it("should filter equipments by status", async () => {
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "Active one" }))
+        .expect(201);
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "Inactive one", status: "inactive" }))
+        .expect(201);
+
+      const { body } = await request(app)
+        .get("/equipments?status=active")
+        .expect(200);
+
+      assert.strictEqual(body.length, 1);
+      assert.strictEqual(body[0].name, "Active one");
+    });
+    it("should return 400 if name contains only spaces", async () => {
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "   " }))
+        .expect(400);
     });
   });
 });

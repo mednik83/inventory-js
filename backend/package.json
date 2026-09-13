@@ -4,8 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "nodemon --env-file=.env server.js",
-    "test": "DB_PATH=./database/inventory.test.sqlite mocha ./tests/*"
+    "start": "nodemon --ext js,ts --exec tsx --env-file=.env ./src/server.js",
+    "test": "DB_PATH=./src/database/inventory.test.sqlite mocha --import=tsx ./src/tests/*",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src"
   },
   "keywords": [],
   "author": "",
@@ -19,8 +21,17 @@
     "uuid": "^14.0.0"
   },
   "devDependencies": {
-    "mocha": "^11.7.5",
+    "@eslint/js": "^10.0.1",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/uuid": "^10.0.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.20.2",
+    "eslint": "^10.10.0",
+    "mocha": "^12.0.0",
     "nodemon": "^3.1.14",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "tsx": "^4.23.13",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.0"
   }
 }
