@@ -4,10 +4,19 @@ import { qrCodeService } from "../services/qr-code.service.js";
 import { handleControllerError } from "../utils/error-handler.js";
 import { validateStatus } from "../utils/validate-status.js";
 import { validateUuid } from "../utils/validate-uuid.js";
+import type { Request, Response } from "express";
+import type { EquipmentStatus } from "../types.ts";
 
-function parsePositiveInteger(value, fieldName) {
+function parsePositiveInteger(
+  value: unknown,
+  fieldName: string,
+): number | undefined {
   if (value === undefined) {
     return undefined;
+  }
+
+  if (typeof value !== "string" || typeof value !== "number") {
+    throw new ValidationError(`${fieldName} must be an integer`);
   }
 
   const parsed = Number(value);
@@ -20,12 +29,18 @@ function parsePositiveInteger(value, fieldName) {
     throw new ValidationError(`${fieldName} must be a positive integer`);
   }
 
+  console.log("parsed:", parsed);
+
   return parsed;
 }
 
-function parseIdsList(value) {
+function parseIdsList(value: unknown): number[] | undefined {
   if (value === undefined) {
     return undefined;
+  }
+
+  if (typeof value !== "string") {
+    throw new ValidationError("room_id must contain only integers");
   }
 
   const ids = value.split(",").map((id) => {
@@ -42,41 +57,50 @@ function parseIdsList(value) {
     return parsed;
   });
 
+  console.log("ids:", ids);
+
   return ids;
 }
 
-function parseStatus(value) {
+function parseStatus(value: unknown): EquipmentStatus | undefined {
   if (value === undefined) {
     return undefined;
   }
+  if (typeof value !== "string") {
+    throw new ValidationError("Status must be a string");
+  }
 
   const status = validateStatus(value);
+
+  console.log("status:", status);
 
   return status;
 }
 
 class EquipmentController {
-  getById(req, res) {
+  getById(req: Request, res: Response): void {
     try {
       const equipment = equipmentService.getById(req.params.id);
-      return res.json(equipment);
+      res.json(equipment);
     } catch (error) {
-      return handleControllerError(error, res);
+      handleControllerError(error, res);
     }
   }
 
-  getByUuid(req, res) {
+  getByUuid(req: Request, res: Response): void {
     try {
       const equipment = equipmentService.getByUuid(req.params.uuid);
-      return res.json(equipment);
+      res.json(equipment);
     } catch (error) {
-      return handleControllerError(error, res);
+      handleControllerError(error, res);
     }
   }
 
-  getAll(req, res) {
+  getAll(req: Request, res: Response): void {
     try {
       const { limit, room_id, status } = req.query;
+
+      console.log(limit, room_id, status);
 
       const filters = {
         limit: parsePositiveInteger(limit, "limit"),
@@ -84,52 +108,52 @@ class EquipmentController {
         status: parseStatus(status),
       };
       const equipments = equipmentService.getAll(filters);
-      return res.json(equipments);
+      res.json(equipments);
     } catch (error) {
-      return handleControllerError(error, res);
+      handleControllerError(error, res);
     }
   }
 
-  create(req, res) {
+  create(req: Request, res: Response): void {
     try {
       const equipment = equipmentService.create(req.body);
-      return res.status(201).json(equipment);
+      res.status(201).json(equipment);
     } catch (error) {
-      return handleControllerError(error, res);
+      handleControllerError(error, res);
     }
   }
 
-  update(req, res) {
+  update(req: Request, res: Response): void {
     try {
       const equipment = equipmentService.update(req.params.id, req.body);
 
-      return res.status(200).json(equipment);
+      res.status(200).json(equipment);
     } catch (error) {
-      return handleControllerError(error, res);
+      handleControllerError(error, res);
     }
   }
 
-  writeOff(req, res) {
+  writeOff(req: Request, res: Response): void {
     try {
       equipmentService.writtenOff(req.params.id);
 
-      return res.status(200).send();
+      res.status(200).send();
     } catch (error) {
-      return handleControllerError(error, res);
+      handleControllerError(error, res);
     }
   }
 
-  forceDelete(req, res) {
+  forceDelete(req: Request, res: Response): void {
     try {
       equipmentService.forceDelete(req.params.id);
 
-      return res.status(204).send();
+      res.status(204).send();
     } catch (error) {
-      return handleControllerError(error, res);
+      handleControllerError(error, res);
     }
   }
 
-  async getQrByUuid(req, res) {
+  async getQrByUuid(req: Request, res: Response): Promise<void> {
     try {
       const { uuid } = req.params;
 
@@ -139,9 +163,9 @@ class EquipmentController {
       const qrSvg = await qrCodeService.generateSvg(equipment.uuid);
 
       res.type("image/svg+xml");
-      return res.send(qrSvg);
+      res.send(qrSvg);
     } catch (error) {
-      return handleControllerError(error, res);
+      handleControllerError(error, res);
     }
   }
 }

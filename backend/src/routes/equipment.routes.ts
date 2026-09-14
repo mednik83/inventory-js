@@ -1,5 +1,6 @@
 import express from "express";
 import { equipmentController } from "../controllers/equipment.controller.js";
+import { AppError } from "../errors/errors.js";
 
 const equipmentRouter = express.Router();
 
@@ -34,7 +35,9 @@ equipmentRouter.delete("/:id", (req, res) => {
 // qr
 
 equipmentRouter.get("/uuid/:uuid/qr", (req, res) => {
-  equipmentController.getQrByUuid(req, res);
+  equipmentController.getQrByUuid(req, res).catch(() => {
+    throw new AppError("QRCode create error", 400);
+  });
 });
 
 export default equipmentRouter;

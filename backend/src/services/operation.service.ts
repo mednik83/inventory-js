@@ -44,9 +44,16 @@ class OperationService {
     });
   }
 
-  getByEquipmentId(equipmentId: unknown) {
-    const validEquipmentId = validateId(equipmentId);
-    return operationRepository.getByEquipmentId(validEquipmentId);
+  getByEquipmentId(equipmentId: unknown): Operation[] {
+    const validEquipmentId: number = validateId(equipmentId);
+    const operations: Operation[] | undefined =
+      operationRepository.getByEquipmentId(validEquipmentId);
+
+    if (!operations) {
+      return [];
+    }
+
+    return operations;
   }
 }
 

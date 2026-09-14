@@ -1,22 +1,24 @@
 import { roomService } from "../services/room.service.js";
+import { Room } from "../types.js";
 import { handleControllerError } from "../utils/error-handler.js";
 import { validateId } from "../utils/validate-id.js";
+import type { Request, Response } from "express";
 
 class RoomController {
-  getAll(req, res) {
+  getAll(req: Request, res: Response) {
     try {
-      const rooms = roomService.getAll();
+      const rooms: Room[] = roomService.getAll();
       res.json(rooms);
     } catch (error) {
       handleControllerError(error, res);
     }
   }
 
-  getById(req, res) {
+  getById(req: Request, res: Response) {
     try {
-      const roomId = validateId(req.params.id);
+      const roomId: number = validateId(req.params.id);
 
-      const room = roomService.getById(roomId);
+      const room: Room = roomService.getById(roomId);
 
       return res.json(room);
     } catch (error) {
@@ -24,18 +26,18 @@ class RoomController {
     }
   }
 
-  create(req, res) {
+  create(req: Request, res: Response) {
     try {
-      const room = roomService.create(req.body);
+      const room: Room | undefined = roomService.create(req.body);
       return res.status(201).json(room);
     } catch (error) {
       handleControllerError(error, res);
     }
   }
 
-  update(req, res) {
+  update(req: Request, res: Response) {
     try {
-      const room = roomService.update(req.params.id, req.body);
+      const room: Room = roomService.update(req.params.id, req.body);
 
       return res.status(200).json(room);
     } catch (error) {
@@ -43,7 +45,7 @@ class RoomController {
     }
   }
 
-  delete(req, res) {
+  delete(req: Request, res: Response) {
     try {
       roomService.delete(req.params.id);
       return res.status(204).send();

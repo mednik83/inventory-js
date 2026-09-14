@@ -23,7 +23,7 @@ class OperationRepository {
       .run(operation.equipment_id, operation.type, operation.comment);
   }
 
-  getByEquipmentId(equipmentId: number) {
+  getByEquipmentId(equipmentId: number): Operation[] | undefined {
     return db
       .prepare(
         `
@@ -31,7 +31,7 @@ class OperationRepository {
       WHERE equipment_id = ?
       `,
       )
-      .all(equipmentId);
+      .all(equipmentId) as Operation[] | undefined;
   }
 
   deleteByEquipmentId(equipmentId: number) {
