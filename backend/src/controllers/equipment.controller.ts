@@ -5,7 +5,7 @@ import { handleControllerError } from "../utils/error-handler.js";
 import { validateStatus } from "../utils/validate-status.js";
 import { validateUuid } from "../utils/validate-uuid.js";
 import type { Request, Response } from "express";
-import type { EquipmentStatus } from "../types.ts";
+import type { EquipmentStatus, Equipment } from "../types.ts";
 
 function parsePositiveInteger(
   value: unknown,
@@ -127,9 +127,9 @@ class EquipmentController {
 
   writeOff(req: Request, res: Response): void {
     try {
-      equipmentService.writtenOff(req.params.id);
+      const equipment: Equipment = equipmentService.writeOff(req.params.id);
 
-      res.status(200).send();
+      res.status(200).json(equipment);
     } catch (error) {
       handleControllerError(error, res);
     }

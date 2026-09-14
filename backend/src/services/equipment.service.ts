@@ -1,7 +1,11 @@
 import { equipmentRepository } from "../repositories/equipment.repository.js";
 import { roomService } from "./room.service.js";
 import { validateId } from "../utils/validate-id.js";
-import { ValidationError, NotFoundError } from "../errors/errors.js";
+import {
+  ValidationError,
+  NotFoundError,
+  ConflictError,
+} from "../errors/errors.js";
 import { validateStatus } from "../utils/validate-status.js";
 import { v4 as uuidv4 } from "uuid";
 import { validateUuid } from "../utils/validate-uuid.js";
@@ -120,26 +124,31 @@ class EquipmentService {
     return equipment;
   }
 
-  writtenOff(id: unknown) {
+  writeOff(id: unknown) {
     const equipmentId = validateId(id);
     const equipment = this.getById(equipmentId);
 
-    const equipmentData: Omit<Equipment, "uuid"> = {
-      id: equipmentId,
-      name: equipment.name,
-      room_id: equipment.room_id,
+    if (equipment.status === "written_off") {
+      throw new ConflictError("The equipment has already been written off.");
+    }
+
+    const equipmentData: Equipment = {
+      ...equipment,
       status: "written_off",
     };
 
-    equipmentRepository.update(equipmentData);
+    const totalUpdated = equipmentRepository.update(equipmentData);
+    if (totalUpdated === 0) {
+      throw new NotFoundError(`Equipment with id=${equipment.id} not found`);
+    }
 
     operationService.create({
       equipment_id: equipmentId,
       type: "write_off",
-      comment: `Equipment with id=${equipmentId} was written_off`,
+      comment: `Equipment with id=${equipmentId} was written off`,
     });
 
-    return true;
+    return equipmentData;
   }
 
   forceDelete(id: unknown) {
