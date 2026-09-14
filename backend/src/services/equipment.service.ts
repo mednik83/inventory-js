@@ -15,7 +15,8 @@ import type {
   Equipment,
   EquipmentFilters,
   EquipmentFormData,
-} from "../types.js";
+  EquipmentWithRoom,
+} from "../types.ts";
 
 function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
   if (typeof data !== "object" || data === null) {
@@ -132,7 +133,7 @@ class EquipmentService {
       throw new ConflictError("The equipment has already been written off.");
     }
 
-    const equipmentData: Equipment = {
+    const equipmentData: EquipmentWithRoom = {
       ...equipment,
       status: "written_off",
     };

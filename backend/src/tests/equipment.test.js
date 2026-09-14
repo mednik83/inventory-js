@@ -291,7 +291,7 @@ describe("Equipment API", () => {
   });
 
   describe("equipment flow", () => {
-    it("should create, get, put and delete equipment by id", async () => {
+    it("should create, get, put and delete (write_off and force delete) equipment by id", async () => {
       const createRes = await request(app)
         .post("/equipments")
         .send({
@@ -324,11 +324,77 @@ describe("Equipment API", () => {
 
       const afterRes = await request(app).get(`/equipments/${id}`).expect(200);
 
+      assert.strictEqual(afterRes.body.id, id);
+      assert.strictEqual(afterRes.body.name, testEquipment.name);
+      assert.strictEqual(afterRes.body.room_id, firstRoomId);
       assert.strictEqual(afterRes.body.status, "written_off");
+
+      await request(app).post(`/equipments/asd/write-off`).expect(400);
+
+      await request(app)
+        .post(`/equipments/${id + 9999}/write-off`)
+        .expect(404);
 
       await request(app).delete(`/equipments/${id}`).expect(204);
 
       await request(app).get(`/equipments/${id}`).expect(404);
+    });
+  });
+
+  describe("POST /equipments/:id/write-off", () => {
+    it("should write off equipment and return updated equipment", async () => {
+      const createRes = await request(app)
+        .post("/equipments")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect("Content-Type", /json/)
+        .expect(201);
+
+      const createdEquipment = createRes.body;
+      const id = createdEquipment.id;
+
+      const afterRes = await request(app)
+        .post(`/equipments/${id}/write-off`)
+        .expect(200);
+
+      assert.strictEqual(afterRes.body.id, id);
+      assert.strictEqual(afterRes.body.name, testEquipment.name);
+      assert.strictEqual(afterRes.body.room_id, firstRoomId);
+      assert.strictEqual(afterRes.body.status, "written_off");
+    });
+
+    it("should return 409 when equipment is already written off", async () => {
+      const createRes = await request(app)
+        .post("/equipments")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect("Content-Type", /json/)
+        .expect(201);
+
+      const createdEquipment = createRes.body;
+      const id = createdEquipment.id;
+
+      await request(app).post(`/equipments/${id}/write-off`).expect(200);
+      const resFalseWritteOff = await request(app)
+        .post(`/equipments/${id}/write-off`)
+        .expect(409);
+      const resBodyMessage = resFalseWritteOff.body.message;
+      assert.strictEqual(
+        resBodyMessage,
+        "The equipment has already been written off.",
+      );
+    });
+    it("should return 400 for invalid id on write-off", async () => {
+      await request(app).post(`/equipments/abc/write-off`).expect(400);
+    });
+    it("should return 404 if equipment does not exist on write-off", async () => {
+      await request(app).post(`/equipments/99999/write-off`).expect(404);
     });
   });
 
