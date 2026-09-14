@@ -29,8 +29,6 @@ function parsePositiveInteger(
     throw new ValidationError(`${fieldName} must be a positive integer`);
   }
 
-  console.log("parsed:", parsed);
-
   return parsed;
 }
 
@@ -57,8 +55,6 @@ function parseIdsList(value: unknown): number[] | undefined {
     return parsed;
   });
 
-  console.log("ids:", ids);
-
   return ids;
 }
 
@@ -71,8 +67,6 @@ function parseStatus(value: unknown): EquipmentStatus | undefined {
   }
 
   const status = validateStatus(value);
-
-  console.log("status:", status);
 
   return status;
 }
@@ -99,8 +93,6 @@ class EquipmentController {
   getAll(req: Request, res: Response): void {
     try {
       const { limit, room_id, status } = req.query;
-
-      console.log(limit, room_id, status);
 
       const filters = {
         limit: parsePositiveInteger(limit, "limit"),

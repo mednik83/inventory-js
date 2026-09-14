@@ -23,15 +23,16 @@ class OperationRepository {
       .run(operation.equipment_id, operation.type, operation.comment);
   }
 
-  getByEquipmentId(equipmentId: number): Operation[] | undefined {
+  getByEquipmentId(equipmentId: number): Operation[] {
     return db
       .prepare(
         `
       SELECT * FROM operations
       WHERE equipment_id = ?
+      ORDER BY created_at DESC, id DESC
       `,
       )
-      .all(equipmentId) as Operation[] | undefined;
+      .all(equipmentId) as Operation[];
   }
 
   deleteByEquipmentId(equipmentId: number) {

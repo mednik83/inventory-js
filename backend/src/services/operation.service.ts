@@ -46,12 +46,8 @@ class OperationService {
 
   getByEquipmentId(equipmentId: unknown): Operation[] {
     const validEquipmentId: number = validateId(equipmentId);
-    const operations: Operation[] | undefined =
+    const operations: Operation[] =
       operationRepository.getByEquipmentId(validEquipmentId);
-
-    if (!operations) {
-      return [];
-    }
 
     return operations;
   }
