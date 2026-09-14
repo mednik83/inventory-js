@@ -40,12 +40,12 @@ const API = {
     }),
 
   deleteEquipment: async (id) =>
-    request(`/equipments/${id}/delete`, {
+    request(`/equipments/${id}`, {
       method: "DELETE",
     }),
 
-  writenOffEquipment: async (id) =>
-    request(`/equipments/${id}`, { method: "PATCH" }),
+  writeOffEquipment: async (id) =>
+    request(`/equipments/${id}/write-off`, { method: "POST" }),
 
   getQRCode: async (uuid) => {
     const res = await fetch(`${BASE_URL}/equipments/uuid/${uuid}/qr`);
