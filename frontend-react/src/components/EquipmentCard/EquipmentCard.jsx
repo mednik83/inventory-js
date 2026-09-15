@@ -16,14 +16,14 @@ function EquipmentCard({ equipment, onDelete, onEdit, onWriteOff }) {
         <b>Equipment uuid:</b> {equipment.uuid}
       </p>
       <div className="buttons">
-        <button className="danger" onClick={() => onDelete(equipment.id)}>
-          Delete
+        <button className="primary" onClick={() => onEdit(equipment)}>
+          Edit
         </button>
         <button className="warning" onClick={() => onWriteOff(equipment.id)}>
           Write off
         </button>
-        <button className="primary" onClick={() => onEdit(equipment)}>
-          Edit
+        <button className="danger" onClick={() => onDelete(equipment.id)}>
+          Delete
         </button>
       </div>
     </div>

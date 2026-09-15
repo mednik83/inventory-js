@@ -8,11 +8,11 @@ function RoomCard({ room, onDelete, onEdit }) {
       </h2>
       <div className="buttons">
         {" "}
-        <button className="danger" onClick={() => onDelete(room.id)}>
-          Delete
-        </button>
         <button className="primary" onClick={() => onEdit(room)}>
           Edit
+        </button>
+        <button className="danger" onClick={() => onDelete(room.id)}>
+          Delete
         </button>
       </div>
     </div>

@@ -364,6 +364,7 @@ describe("Equipment API", () => {
       assert.strictEqual(afterRes.body.name, testEquipment.name);
       assert.strictEqual(afterRes.body.room_id, firstRoomId);
       assert.strictEqual(afterRes.body.status, "written_off");
+      assert.strictEqual(afterRes.body.uuid, createdEquipment.uuid);
     });
 
     it("should return 409 when equipment is already written off", async () => {
@@ -391,34 +392,14 @@ describe("Equipment API", () => {
         resBodyMessage,
         "The equipment has already been written off.",
       );
-
-      assert.strictEqual(res.body.uuid, createdEquipment.uuid);
     });
     it("should return 400 for invalid id on write-off", async () => {
-      const createRes = await request(app)
-        .post("/equipments")
-        .send({
-          name: testEquipment.name,
-          room_id: firstRoomId,
-          status: testEquipment.status,
-        })
-        .expect("Content-Type", /json/)
-        .expect(201);
       const res = await request(app)
         .post(`/equipments/abc/write-off`)
         .expect(400);
       assert.strictEqual(res.body.message, "Invalid ID");
     });
     it("should return 404 if equipment does not exist on write-off", async () => {
-      const createRes = await request(app)
-        .post("/equipments")
-        .send({
-          name: testEquipment.name,
-          room_id: firstRoomId,
-          status: testEquipment.status,
-        })
-        .expect("Content-Type", /json/)
-        .expect(201);
       const res = await request(app)
         .post(`/equipments/99999/write-off`)
         .expect(404);
