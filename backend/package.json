@@ -2,10 +2,10 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "server.ts",
   "scripts": {
-    "start": "nodemon --ext js,ts --exec tsx --env-file=.env ./src/server.js",
-    "test": "DB_PATH=./src/database/inventory.test.sqlite mocha --import=tsx ./src/tests/*",
+    "start": "nodemon --ext js,ts --exec tsx --env-file=.env ./src/server.ts",
+    "test": "mocha --import=tsx --env-file=.env.test ./src/tests/*",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src"
   },
