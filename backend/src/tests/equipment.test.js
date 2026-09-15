@@ -381,9 +381,7 @@ describe("Equipment API", () => {
       const createdEquipment = createRes.body;
       const id = createdEquipment.id;
 
-      const res = await request(app)
-        .post(`/equipments/${id}/write-off`)
-        .expect(200);
+      await request(app).post(`/equipments/${id}/write-off`).expect(200);
       const resFalseWritteOff = await request(app)
         .post(`/equipments/${id}/write-off`)
         .expect(409);
