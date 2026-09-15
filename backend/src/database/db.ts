@@ -4,10 +4,6 @@ import path from "node:path";
 const dbPath =
   process.env.DB_PATH ?? path.join(import.meta.dirname, "inventory.sqlite");
 
-if (!dbPath) {
-  throw new Error("DB_PATH not found");
-}
-
 const db = new Database(dbPath);
 
 db.pragma("journal_mode = WAL");
