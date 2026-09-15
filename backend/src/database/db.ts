@@ -1,6 +1,12 @@
 import Database from "better-sqlite3";
+import path from "node:path";
 
-const dbPath = process.env.DB_PATH;
+const dbPath =
+  process.env.DB_PATH ?? path.join(import.meta.dirname, "inventory.sqlite");
+
+if (!dbPath) {
+  throw new Error("DB_PATH not found");
+}
 
 const db = new Database(dbPath);
 

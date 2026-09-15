@@ -92,7 +92,7 @@ class EquipmentService {
     operationService.create({
       equipment_id: newEquipment.id,
       type: "create",
-      comment: `Equipment "${newEquipment.name}" created`,
+      comment: `Equipment "${newEquipment.name}" was created`,
     });
 
     return newEquipment;
@@ -119,7 +119,7 @@ class EquipmentService {
     operationService.create({
       equipment_id: equipment.id,
       type: "update",
-      comment: `Equipment "${equipment.name}" created`,
+      comment: `Equipment "${equipment.name}" was created`,
     });
 
     return equipment;
