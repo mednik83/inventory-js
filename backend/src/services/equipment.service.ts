@@ -146,7 +146,7 @@ class EquipmentService {
     operationService.create({
       equipment_id: equipmentId,
       type: "write_off",
-      comment: `Equipment with id=${equipmentId} was written off`,
+      comment: `Equipment "${equipmentData.name}" was written off`,
     });
 
     return equipmentData;

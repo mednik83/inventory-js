@@ -85,7 +85,7 @@ function App() {
   };
 
   const handleDeleteEquipment = async (id) => {
-    const isConfirm = window.confirm("Do you really want delete it?");
+    const isConfirm = window.confirm("Do you really want to delete it?");
     if (!isConfirm) {
       return;
     }
