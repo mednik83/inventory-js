@@ -380,7 +380,9 @@ describe("Equipment API", () => {
       const createdEquipment = createRes.body;
       const id = createdEquipment.id;
 
-      await request(app).post(`/equipments/${id}/write-off`).expect(200);
+      const res = await request(app)
+        .post(`/equipments/${id}/write-off`)
+        .expect(200);
       const resFalseWritteOff = await request(app)
         .post(`/equipments/${id}/write-off`)
         .expect(409);
@@ -389,12 +391,38 @@ describe("Equipment API", () => {
         resBodyMessage,
         "The equipment has already been written off.",
       );
+
+      assert.strictEqual(res.body.uuid, createdEquipment.uuid);
     });
     it("should return 400 for invalid id on write-off", async () => {
-      await request(app).post(`/equipments/abc/write-off`).expect(400);
+      const createRes = await request(app)
+        .post("/equipments")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect("Content-Type", /json/)
+        .expect(201);
+      const res = await request(app)
+        .post(`/equipments/abc/write-off`)
+        .expect(400);
+      assert.strictEqual(res.body.message, "Invalid ID");
     });
     it("should return 404 if equipment does not exist on write-off", async () => {
-      await request(app).post(`/equipments/99999/write-off`).expect(404);
+      const createRes = await request(app)
+        .post("/equipments")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect("Content-Type", /json/)
+        .expect(201);
+      const res = await request(app)
+        .post(`/equipments/99999/write-off`)
+        .expect(404);
+      assert.strictEqual(res.body.message, "Equipment not found");
     });
   });
 

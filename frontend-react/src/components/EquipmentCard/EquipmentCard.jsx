@@ -1,6 +1,6 @@
 import "./EquipmentCard.css";
 
-function EquipmentCard({ equipment, onDelete, onEdit }) {
+function EquipmentCard({ equipment, onDelete, onEdit, onWriteOff }) {
   return (
     <div className="equipment-card">
       <h2>
@@ -18,6 +18,9 @@ function EquipmentCard({ equipment, onDelete, onEdit }) {
       <div className="buttons">
         <button className="danger" onClick={() => onDelete(equipment.id)}>
           Delete
+        </button>
+        <button className="warning" onClick={() => onWriteOff(equipment.id)}>
+          Write off
         </button>
         <button className="primary" onClick={() => onEdit(equipment)}>
           Edit

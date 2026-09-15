@@ -14,6 +14,7 @@ function EquipmentPage({
   loading,
   searchQuery,
   setSearchQuery,
+  handleWriteOffEquipment,
 }) {
   return (
     <>
@@ -33,6 +34,7 @@ function EquipmentPage({
       ) : (
         <EquipmentList
           onDelete={handleDeleteEquipment}
+          onWriteOff={handleWriteOffEquipment}
           onEdit={startEditEquipment}
           equipments={equipments}
         />

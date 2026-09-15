@@ -16,7 +16,7 @@ import type {
   EquipmentFilters,
   EquipmentFormData,
   EquipmentWithRoom,
-} from "../types.ts";
+} from "../types.js";
 
 function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
   if (typeof data !== "object" || data === null) {

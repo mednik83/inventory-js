@@ -85,6 +85,10 @@ function App() {
   };
 
   const handleDeleteEquipment = async (id) => {
+    const isConfirm = window.confirm("Do you really want delete it?");
+    if (!isConfirm) {
+      return;
+    }
     setLoading(true);
     try {
       await API.deleteEquipment(id);
@@ -97,7 +101,24 @@ function App() {
     }
   };
 
+  const handleWriteOffEquipment = async (id) => {
+    setLoading(true);
+    try {
+      await API.writeOffEquipment(id);
+      await loadData();
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteRoom = async (id) => {
+    const isConfirm = window.confirm("Do you really want delete it?");
+    if (!isConfirm) {
+      return;
+    }
     setLoading(true);
     try {
       await API.deleteRoom(id);
@@ -137,6 +158,7 @@ function App() {
                 editingEquipment={editingEquipment}
                 equipments={filteredEquipments}
                 handleDeleteEquipment={handleDeleteEquipment}
+                handleWriteOffEquipment={handleWriteOffEquipment}
                 startEditEquipment={startEditEquipment}
                 error={error}
                 loading={loading}
