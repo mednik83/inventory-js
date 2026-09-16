@@ -455,4 +455,16 @@ describe("Equipment API", () => {
       await request(app).delete(`/rooms/${firstRoomId}`).expect(409);
     });
   });
+
+  describe("malformed JSON", () => {
+    it("should return 400 when body is malformed JSON", async () => {
+      const res = await request(app)
+        .post("/equipments")
+        .set("Content-Type", "application/json")
+        .send('{"name":')
+        .expect(400);
+
+      assert.strictEqual(res.body.message, "Malformed JSON");
+    });
+  });
 });
