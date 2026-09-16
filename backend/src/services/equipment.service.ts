@@ -109,6 +109,12 @@ class EquipmentService {
 
     const validData = validateEquipment(data);
 
+    if (validData.status === "written_off") {
+      throw new ValidationError(
+        'Status cannot be "written_off" when updating an equipment',
+      );
+    }
+
     roomService.getById(validData.room_id);
 
     const equipment = {

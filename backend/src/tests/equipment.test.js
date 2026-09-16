@@ -80,6 +80,23 @@ describe("Equipment API", () => {
         });
     });
 
+    it("should return 400 when creating equipment with written_off status", async () => {
+      const res = await request(app)
+        .post("/equipments")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: "written_off",
+        })
+        .expect("Content-Type", /json/)
+        .expect(400);
+
+      assert.strictEqual(
+        res.body.message,
+        `Status cannot be "written_off" when creating an equipment`,
+      );
+    });
+
     it("should return 400 if data is missing", async () => {
       await request(app)
         .post("/equipments")
@@ -196,6 +213,35 @@ describe("Equipment API", () => {
       assert.strictEqual(putRes.body.name, putEquipment.name);
       assert.strictEqual(putRes.body.room_id, putEquipment.room_id);
       assert.strictEqual(putRes.body.status, putEquipment.status);
+    });
+
+    it("should return 400 when updating equipment to written_off status", async () => {
+      const createRes = await request(app)
+        .post("/equipments")
+        .send({
+          name: "Monitor",
+          room_id: firstRoomId,
+          status: "active",
+        })
+        .expect(201);
+
+      await request(app)
+        .post(`/equipments/${createRes.body.id}/write-off`)
+        .expect(200);
+
+      const res = await request(app)
+        .put(`/equipments/${createRes.body.id}`)
+        .send({
+          name: "Monitor",
+          room_id: firstRoomId,
+          status: "written_off",
+        })
+        .expect(400);
+
+      assert.strictEqual(
+        res.body.message,
+        `Status cannot be "written_off" when updating an equipment`,
+      );
     });
 
     it("should return 400 for invalid status on update", async () => {
