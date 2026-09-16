@@ -65,7 +65,6 @@ function EquipmentForm({
         >
           <option value={"active"}>active</option>
           <option value={"inactive"}>inactive</option>
-          <option value={"written_off"}>written off</option>
         </select>
       </div>
       <div className="form_input">
