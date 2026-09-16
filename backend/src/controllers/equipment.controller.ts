@@ -14,7 +14,7 @@ function parsePositiveInteger(
     return undefined;
   }
 
-  if (typeof value !== "string" || typeof value !== "number") {
+  if (typeof value !== "string" && typeof value !== "number") {
     throw new ValidationError(`${fieldName} must be an integer`);
   }
 

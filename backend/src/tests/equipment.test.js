@@ -482,6 +482,47 @@ describe("Equipment API", () => {
       assert.strictEqual(body.length, 1);
       assert.strictEqual(body[0].name, "Active one");
     });
+    it("should filter equipments by room_id", async () => {
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "Monitor 1", room_id: firstRoomId }))
+        .expect(201);
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "Monitor 2", room_id: firstRoomId }))
+        .expect(201);
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "Monitor 3", room_id: secondRoomId }))
+        .expect(201);
+
+      const { body } = await request(app)
+        .get(`/equipments?room_id=${firstRoomId}`)
+        .expect(200);
+
+      assert.strictEqual(body[0].name, "Monitor 1");
+      assert.strictEqual(body[1].name, "Monitor 2");
+    });
+    it("should filter equipments by limit", async () => {
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "Monitor 1", room_id: firstRoomId }))
+        .expect(201);
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "Monitor 2", room_id: firstRoomId }))
+        .expect(201);
+      await request(app)
+        .post("/equipments")
+        .send(makeEquipment({ name: "Monitor 3", room_id: firstRoomId }))
+        .expect(201);
+
+      const { body } = await request(app)
+        .get(`/equipments?room_id=${firstRoomId}&limit=2`)
+        .expect(200);
+
+      assert.strictEqual(body.length, 2);
+    });
     it("should return 400 if name contains only spaces", async () => {
       await request(app)
         .post("/equipments")
