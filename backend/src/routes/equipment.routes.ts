@@ -4,38 +4,38 @@ import { AppError } from "../errors/errors.js";
 
 const equipmentRouter = express.Router();
 
-equipmentRouter.get("/", (req, res) => {
-  equipmentController.getAll(req, res);
+equipmentRouter.get("/", (req, res, next) => {
+  equipmentController.getAll(req, res, next);
 });
 
-equipmentRouter.get("/:id", (req, res) => {
-  equipmentController.getById(req, res);
+equipmentRouter.get("/:id", (req, res, next) => {
+  equipmentController.getById(req, res, next);
 });
 
-equipmentRouter.get("/uuid/:uuid", (req, res) => {
-  equipmentController.getByUuid(req, res);
+equipmentRouter.get("/uuid/:uuid", (req, res, next) => {
+  equipmentController.getByUuid(req, res, next);
 });
 
-equipmentRouter.post("/", (req, res) => {
-  equipmentController.create(req, res);
+equipmentRouter.post("/", (req, res, next) => {
+  equipmentController.create(req, res, next);
 });
 
-equipmentRouter.put("/:id", (req, res) => {
-  equipmentController.update(req, res);
+equipmentRouter.put("/:id", (req, res, next) => {
+  equipmentController.update(req, res, next);
 });
 
-equipmentRouter.post("/:id/write-off", (req, res) => {
-  equipmentController.writeOff(req, res);
+equipmentRouter.post("/:id/write-off", (req, res, next) => {
+  equipmentController.writeOff(req, res, next);
 });
 
-equipmentRouter.delete("/:id", (req, res) => {
-  equipmentController.forceDelete(req, res);
+equipmentRouter.delete("/:id", (req, res, next) => {
+  equipmentController.forceDelete(req, res, next);
 });
 
 // qr
 
-equipmentRouter.get("/uuid/:uuid/qr", (req, res) => {
-  equipmentController.getQrByUuid(req, res).catch(() => {
+equipmentRouter.get("/uuid/:uuid/qr", (req, res, next) => {
+  equipmentController.getQrByUuid(req, res, next).catch(() => {
     throw new AppError("QRCode create error", 400);
   });
 });

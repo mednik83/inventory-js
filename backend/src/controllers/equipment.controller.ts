@@ -1,10 +1,9 @@
 import { ValidationError } from "../errors/errors.js";
 import { equipmentService } from "../services/equipment.service.js";
 import { qrCodeService } from "../services/qr-code.service.js";
-import { handleControllerError } from "../utils/error-handler.js";
 import { validateStatus } from "../utils/validate-status.js";
 import { validateUuid } from "../utils/validate-uuid.js";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type { EquipmentStatus, EquipmentWithRoom } from "../types.ts";
 
 function parsePositiveInteger(
@@ -72,25 +71,25 @@ function parseStatus(value: unknown): EquipmentStatus | undefined {
 }
 
 class EquipmentController {
-  getById(req: Request, res: Response): void {
+  getById(req: Request, res: Response, next: NextFunction): void {
     try {
       const equipment = equipmentService.getById(req.params.id);
       res.json(equipment);
     } catch (error) {
-      handleControllerError(error, res);
+      next(error);
     }
   }
 
-  getByUuid(req: Request, res: Response): void {
+  getByUuid(req: Request, res: Response, next: NextFunction): void {
     try {
       const equipment = equipmentService.getByUuid(req.params.uuid);
       res.json(equipment);
     } catch (error) {
-      handleControllerError(error, res);
+      next(error);
     }
   }
 
-  getAll(req: Request, res: Response): void {
+  getAll(req: Request, res: Response, next: NextFunction): void {
     try {
       const { limit, room_id, status } = req.query;
 
@@ -102,30 +101,30 @@ class EquipmentController {
       const equipments = equipmentService.getAll(filters);
       res.json(equipments);
     } catch (error) {
-      handleControllerError(error, res);
+      next(error);
     }
   }
 
-  create(req: Request, res: Response): void {
+  create(req: Request, res: Response, next: NextFunction): void {
     try {
       const equipment = equipmentService.create(req.body);
       res.status(201).json(equipment);
     } catch (error) {
-      handleControllerError(error, res);
+      next(error);
     }
   }
 
-  update(req: Request, res: Response): void {
+  update(req: Request, res: Response, next: NextFunction): void {
     try {
       const equipment = equipmentService.update(req.params.id, req.body);
 
       res.status(200).json(equipment);
     } catch (error) {
-      handleControllerError(error, res);
+      next(error);
     }
   }
 
-  writeOff(req: Request, res: Response): void {
+  writeOff(req: Request, res: Response, next: NextFunction): void {
     try {
       const equipment: EquipmentWithRoom = equipmentService.writeOff(
         req.params.id,
@@ -133,21 +132,25 @@ class EquipmentController {
 
       res.status(200).json(equipment);
     } catch (error) {
-      handleControllerError(error, res);
+      next(error);
     }
   }
 
-  forceDelete(req: Request, res: Response): void {
+  forceDelete(req: Request, res: Response, next: NextFunction): void {
     try {
       equipmentService.forceDelete(req.params.id);
 
       res.status(204).send();
     } catch (error) {
-      handleControllerError(error, res);
+      next(error);
     }
   }
 
-  async getQrByUuid(req: Request, res: Response): Promise<void> {
+  async getQrByUuid(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { uuid } = req.params;
 
@@ -159,7 +162,7 @@ class EquipmentController {
       res.type("image/svg+xml");
       res.send(qrSvg);
     } catch (error) {
-      handleControllerError(error, res);
+      next(error);
     }
   }
 }
