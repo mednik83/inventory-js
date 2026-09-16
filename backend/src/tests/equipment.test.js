@@ -500,6 +500,7 @@ describe("Equipment API", () => {
         .get(`/equipments?room_id=${firstRoomId}`)
         .expect(200);
 
+      assert.strictEqual(body.length, 2);
       assert.strictEqual(body[0].name, "Monitor 1");
       assert.strictEqual(body[1].name, "Monitor 2");
     });

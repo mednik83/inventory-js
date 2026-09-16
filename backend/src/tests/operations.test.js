@@ -55,9 +55,35 @@ describe("Operations API", () => {
           .expect(200)
           .expect("Content-Type", /json/);
 
-        assert.ok(Array.isArray(resOperations.body), "Expected array of rooms");
+        assert.ok(
+          Array.isArray(resOperations.body),
+          "Expected array of operations",
+        );
       });
-      it("should return with limit and room_id operations as json array", async () => {
+      it("should return 400 when operations without equipment_id", async () => {
+        const resRoom1 = await request(app)
+          .post("/rooms")
+          .send({
+            name: testRoom.name,
+          })
+          .expect("Content-Type", /json/)
+          .expect(201);
+
+        await request(app)
+          .post("/equipments")
+          .send({
+            name: testEquipment.name,
+            room_id: resRoom1.body.id,
+            status: testEquipment.status,
+          })
+          .expect("Content-Type", /json/)
+          .expect(201);
+
+        const resOperations1 = await request(app)
+          .get(`/operations?equipment_id=abc`)
+          .expect(400);
+      });
+      it("should return with equipment_id as json array", async () => {
         const resRoom1 = await request(app)
           .post("/rooms")
           .send({
@@ -117,23 +143,14 @@ describe("Operations API", () => {
           .expect(200);
 
         const resOperations1 = await request(app)
-          .get(
-            `/operations?equipment_id=${resEquipment.body.id}&limit=2&room_id=${resRoom1.body.id}`,
-          )
+          .get(`/operations?equipment_id=${resEquipment.body.id}`)
           .expect(200)
           .expect("Content-Type", /json/);
 
         assert.ok(
           Array.isArray(resOperations1.body),
-          "Expected array of rooms",
+          "Expected array of operations",
         );
-
-        const resOperations2 = await request(app)
-          .get(
-            `/operations?equipment_id=${resEquipment.body.id}&limit=2&room_id=${resRoom1.body.id}`,
-          )
-          .expect(200)
-          .expect("Content-Type", /json/);
       });
     });
   });
