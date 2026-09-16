@@ -76,6 +76,12 @@ class EquipmentService {
   create(data: unknown) {
     const validData = validateEquipment(data);
 
+    if (validData.status === "written_off") {
+      throw new ValidationError(
+        'Status cannot be "written_off" when creating an equipment',
+      );
+    }
+
     roomService.getById(validData.room_id);
 
     const equipment: Omit<Equipment, "id"> = {
