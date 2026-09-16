@@ -4,7 +4,7 @@ import { qrCodeService } from "../services/qr-code.service.js";
 import { validateStatus } from "../utils/validate-status.js";
 import { validateUuid } from "../utils/validate-uuid.js";
 import type { NextFunction, Request, Response } from "express";
-import type { EquipmentStatus, EquipmentWithRoom } from "../types.ts";
+import type { EquipmentStatus, EquipmentWithRoom } from "../types.js";
 
 function parsePositiveInteger(
   value: unknown,
@@ -146,21 +146,20 @@ class EquipmentController {
     }
   }
 
-  async getQrByUuid(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  getQrByUuid(req: Request, res: Response, next: NextFunction): void {
     try {
       const { uuid } = req.params;
 
       const validUuid = validateUuid(uuid);
       const equipment = equipmentService.getByUuid(validUuid);
 
-      const qrSvg = await qrCodeService.generateSvg(equipment.uuid);
-
-      res.type("image/svg+xml");
-      res.send(qrSvg);
+      qrCodeService
+        .generateSvg(equipment.uuid)
+        .then((qrSvg) => {
+          res.type("image/svg+xml");
+          res.send(qrSvg);
+        })
+        .catch(next);
     } catch (error) {
       next(error);
     }
