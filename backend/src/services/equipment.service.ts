@@ -18,12 +18,14 @@ import type {
   EquipmentWithRoom,
 } from "../types.js";
 
-function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
+function validateEquipment(
+  data: unknown,
+): Omit<EquipmentFormData, "uuid"> | EquipmentFormData {
   if (typeof data !== "object" || data === null) {
     throw new ValidationError("Invalid equipment data");
   }
 
-  const { name, room_id, status } = data as Record<string, unknown>;
+  const { name, room_id, status, uuid } = data as Record<string, unknown>;
 
   if (typeof name !== "string" || typeof status !== "string") {
     throw new ValidationError("Invalid equipment data");
@@ -39,10 +41,18 @@ function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
     throw new ValidationError("The room id must be a positive integer");
   }
 
+  if (typeof uuid !== "string") {
+    return {
+      name: trimmedName,
+      room_id: roomId,
+      status: validateStatus(status.trim()),
+    };
+  }
   return {
     name: trimmedName,
     room_id: roomId,
     status: validateStatus(status.trim()),
+    uuid: uuid,
   };
 }
 
