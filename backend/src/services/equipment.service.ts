@@ -117,20 +117,16 @@ class EquipmentService {
 
     const currentEquipment = this.getById(equipmentId);
 
-    roomService.getById(validData.room_id);
+    const room = roomService.getById(validData.room_id);
 
     const equipment = {
       id: equipmentId,
       uuid: currentEquipment.uuid,
-      room_name: currentEquipment.room_name,
+      room_name: room.name,
       ...validData,
     };
 
-    const result = equipmentRepository.update(equipment);
-
-    if (result === 0) {
-      throw new NotFoundError("Equipment not found");
-    }
+    equipmentRepository.update(equipment);
 
     operationService.create({
       equipment_id: equipment.id,
