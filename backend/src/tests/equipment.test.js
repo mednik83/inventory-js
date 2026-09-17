@@ -213,6 +213,7 @@ describe("Equipment API", () => {
       assert.strictEqual(putRes.body.name, putEquipment.name);
       assert.strictEqual(putRes.body.room_id, putEquipment.room_id);
       assert.strictEqual(putRes.body.status, putEquipment.status);
+      assert.strictEqual(putRes.body.uuid, createRes.body.uuid);
     });
 
     it("should return 400 when updating equipment to written_off status", async () => {
