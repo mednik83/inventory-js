@@ -5,6 +5,7 @@ import {
   ValidationError,
   NotFoundError,
   ConflictError,
+  AppError,
 } from "../errors/errors.js";
 import { validateStatus } from "../utils/validate-status.js";
 import { v4 as uuidv4 } from "uuid";
@@ -165,7 +166,7 @@ class EquipmentService {
       );
     }
 
-    roomService.getById(validData.room_id);
+    const room = roomService.getById(validData.room_id);
 
     const equipment: Omit<Equipment, "id"> = {
       uuid: uuidv4(),
@@ -175,8 +176,13 @@ class EquipmentService {
     const equipmentData = equipmentRepository.create(equipment);
 
     if (!equipmentData) {
-      throw new Error("Не удалось создать оборудование");
+      throw new AppError("Failed to create equipment");
     }
+
+    const newEquipment = {
+      ...equipmentData,
+      room_name: room.name,
+    };
 
     operationService.create({
       equipment_id: equipmentData.id,
@@ -184,7 +190,7 @@ class EquipmentService {
       comment: `Equipment "${equipmentData.name}" was created`,
     });
 
-    return equipmentData;
+    return newEquipment;
   }
 
   update(id: unknown, data: unknown): EquipmentWithRoom {
@@ -205,8 +211,8 @@ class EquipmentService {
     const equipmentData = {
       id: equipmentId,
       uuid: currentEquipment.uuid,
-      room_name: room.name,
       ...validData,
+      room_name: room.name,
     };
 
     equipmentRepository.update(equipmentData);
