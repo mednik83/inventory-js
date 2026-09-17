@@ -47,7 +47,7 @@ function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
 }
 
 class EquipmentService {
-  getById(id: unknown) {
+  getById(id: unknown): EquipmentWithRoom {
     const equipmentId = validateId(id);
     const equipment = equipmentRepository.findById(equipmentId);
 
@@ -58,7 +58,7 @@ class EquipmentService {
     return equipment;
   }
 
-  getByUuid(uuid: unknown) {
+  getByUuid(uuid: unknown): EquipmentWithRoom {
     const equipmentUuid = validateUuid(uuid);
     const equipment = equipmentRepository.findByUuid(equipmentUuid);
 
@@ -73,7 +73,7 @@ class EquipmentService {
     return equipmentRepository.findAll(filters);
   }
 
-  create(data: unknown) {
+  create(data: unknown): EquipmentWithRoom {
     const validData = validateEquipment(data);
 
     if (validData.status === "written_off") {
@@ -104,7 +104,7 @@ class EquipmentService {
     return newEquipment;
   }
 
-  update(id: unknown, data: unknown) {
+  update(id: unknown, data: unknown): EquipmentWithRoom {
     const equipmentId = validateId(id);
 
     const validData = validateEquipment(data);
@@ -122,6 +122,7 @@ class EquipmentService {
     const equipment = {
       id: equipmentId,
       uuid: currentEquipment.uuid,
+      room_name: currentEquipment.room_name,
       ...validData,
     };
 
@@ -140,7 +141,7 @@ class EquipmentService {
     return equipment;
   }
 
-  writeOff(id: unknown) {
+  writeOff(id: unknown): EquipmentWithRoom {
     const equipmentId = validateId(id);
     const equipment = this.getById(equipmentId);
 
@@ -153,10 +154,7 @@ class EquipmentService {
       status: "written_off",
     };
 
-    const totalUpdated = equipmentRepository.update(equipmentData);
-    if (totalUpdated === 0) {
-      throw new NotFoundError(`Equipment with id=${equipment.id} not found`);
-    }
+    equipmentRepository.update(equipmentData);
 
     operationService.create({
       equipment_id: equipmentId,
@@ -167,7 +165,7 @@ class EquipmentService {
     return equipmentData;
   }
 
-  forceDelete(id: unknown) {
+  forceDelete(id: unknown): boolean {
     const equipmentId = validateId(id);
     this.getById(equipmentId); // validate id
 

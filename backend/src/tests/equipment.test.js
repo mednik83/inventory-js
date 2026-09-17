@@ -213,6 +213,7 @@ describe("Equipment API", () => {
       assert.strictEqual(putRes.body.name, putEquipment.name);
       assert.strictEqual(putRes.body.room_id, putEquipment.room_id);
       assert.strictEqual(putRes.body.status, putEquipment.status);
+      assert.ok(putRes.body.uuid);
       assert.strictEqual(putRes.body.uuid, createRes.body.uuid);
     });
 
