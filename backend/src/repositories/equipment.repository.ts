@@ -110,6 +110,20 @@ class EquipmentRepository {
     return result.changes;
   }
 
+  updateRoom(id: number, roomId: number): number {
+    const result = db
+      .prepare(
+        `
+        UPDATE equipments
+        SET room_id = ?
+        WHERE id = ?
+      `,
+      )
+      .run(roomId, id);
+
+    return result.changes;
+  }
+
   countByRoomId(roomId: number): number {
     const row = db
       .prepare(`SELECT COUNT(*) AS count FROM equipments WHERE room_id = ?`)
