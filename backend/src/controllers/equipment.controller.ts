@@ -1,74 +1,8 @@
-import { ValidationError } from "../errors/errors.js";
 import { equipmentService } from "../services/equipment.service.js";
 import { qrCodeService } from "../services/qr-code.service.js";
-import { validateStatus } from "../utils/validate-status.js";
 import { validateUuid } from "../utils/validate-uuid.js";
 import type { NextFunction, Request, Response } from "express";
-import type { EquipmentStatus, EquipmentWithRoom } from "../types.js";
-
-function parsePositiveInteger(
-  value: unknown,
-  fieldName: string,
-): number | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  if (typeof value !== "string" && typeof value !== "number") {
-    throw new ValidationError(`${fieldName} must be an integer`);
-  }
-
-  const parsed = Number(value);
-
-  if (!Number.isInteger(parsed)) {
-    throw new ValidationError(`${fieldName} must be an integer`);
-  }
-
-  if (parsed <= 0) {
-    throw new ValidationError(`${fieldName} must be a positive integer`);
-  }
-
-  return parsed;
-}
-
-function parseIdsList(value: unknown): number[] | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  if (typeof value !== "string") {
-    throw new ValidationError("room_id must contain only integers");
-  }
-
-  const ids = value.split(",").map((id) => {
-    const parsed = Number(id.trim());
-
-    if (!Number.isInteger(parsed)) {
-      throw new ValidationError("room_id must contain only integers");
-    }
-
-    if (parsed <= 0) {
-      throw new ValidationError("room_id must contain only positive integers");
-    }
-
-    return parsed;
-  });
-
-  return ids;
-}
-
-function parseStatus(value: unknown): EquipmentStatus | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-  if (typeof value !== "string") {
-    throw new ValidationError("Status must be a string");
-  }
-
-  const status = validateStatus(value);
-
-  return status;
-}
+import type { EquipmentWithRoom } from "../types.js";
 
 class EquipmentController {
   getById(req: Request, res: Response, next: NextFunction): void {
@@ -91,13 +25,7 @@ class EquipmentController {
 
   getAll(req: Request, res: Response, next: NextFunction): void {
     try {
-      const { limit, room_id, status } = req.query;
-
-      const filters = {
-        limit: parsePositiveInteger(limit, "limit"),
-        roomIds: parseIdsList(room_id),
-        status: parseStatus(status),
-      };
+      const filters: unknown = req.query;
       const equipments = equipmentService.getAll(filters);
       res.json(equipments);
     } catch (error) {

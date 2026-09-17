@@ -15,8 +15,89 @@ import type {
   Equipment,
   EquipmentFilters,
   EquipmentFormData,
+  EquipmentStatus,
   EquipmentWithRoom,
 } from "../types.js";
+
+function validateFilters(filters: unknown): EquipmentFilters {
+  if (typeof filters !== "object" || filters === null) {
+    throw new ValidationError("filters is not valid");
+  }
+
+  const { limit, room_id, status } = filters as Record<string, unknown>;
+
+  const validFilters = {
+    limit: parsePositiveInteger(limit, "limit"),
+    roomIds: parseIdsList(room_id),
+    status: parseStatus(status),
+  };
+
+  return validFilters;
+}
+
+function parsePositiveInteger(
+  value: unknown,
+  fieldName: string,
+): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string" && typeof value !== "number") {
+    throw new ValidationError(`${fieldName} must be an integer`);
+  }
+
+  const parsed = Number(value);
+
+  if (!Number.isInteger(parsed)) {
+    throw new ValidationError(`${fieldName} must be an integer`);
+  }
+
+  if (parsed <= 0) {
+    throw new ValidationError(`${fieldName} must be a positive integer`);
+  }
+
+  return parsed;
+}
+
+function parseIdsList(value: unknown): number[] | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string") {
+    throw new ValidationError("room_id must contain only integers");
+  }
+
+  const ids = value.split(",").map((id) => {
+    const parsed = Number(id.trim());
+
+    if (!Number.isInteger(parsed)) {
+      throw new ValidationError("room_id must contain only integers");
+    }
+
+    if (parsed <= 0) {
+      throw new ValidationError("room_id must contain only positive integers");
+    }
+
+    return parsed;
+  });
+
+  return ids;
+}
+
+function parseStatus(value: unknown): EquipmentStatus | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (typeof value !== "string") {
+    throw new ValidationError("Status must be a string");
+  }
+
+  const status = validateStatus(value);
+
+  return status;
+}
 
 function validateEquipment(data: unknown): Omit<EquipmentFormData, "uuid"> {
   if (typeof data !== "object" || data === null) {
@@ -69,8 +150,10 @@ class EquipmentService {
     return equipment;
   }
 
-  getAll(filters: EquipmentFilters) {
-    return equipmentRepository.findAll(filters);
+  getAll(filters: unknown) {
+    const validFilters = validateFilters(filters);
+
+    return equipmentRepository.findAll(validFilters);
   }
 
   create(data: unknown): EquipmentWithRoom {
@@ -89,19 +172,19 @@ class EquipmentService {
       ...validData,
     };
 
-    const newEquipment = equipmentRepository.create(equipment);
+    const equipmentData = equipmentRepository.create(equipment);
 
-    if (!newEquipment) {
+    if (!equipmentData) {
       throw new Error("Не удалось создать оборудование");
     }
 
     operationService.create({
-      equipment_id: newEquipment.id,
+      equipment_id: equipmentData.id,
       type: "create",
-      comment: `Equipment "${newEquipment.name}" was created`,
+      comment: `Equipment "${equipmentData.name}" was created`,
     });
 
-    return newEquipment;
+    return equipmentData;
   }
 
   update(id: unknown, data: unknown): EquipmentWithRoom {
@@ -119,22 +202,22 @@ class EquipmentService {
 
     const room = roomService.getById(validData.room_id);
 
-    const equipment = {
+    const equipmentData = {
       id: equipmentId,
       uuid: currentEquipment.uuid,
       room_name: room.name,
       ...validData,
     };
 
-    equipmentRepository.update(equipment);
+    equipmentRepository.update(equipmentData);
 
     operationService.create({
-      equipment_id: equipment.id,
+      equipment_id: equipmentData.id,
       type: "update",
-      comment: `Equipment "${equipment.name}" was updated`,
+      comment: `Equipment "${equipmentData.name}" was updated`,
     });
 
-    return equipment;
+    return equipmentData;
   }
 
   writeOff(id: unknown): EquipmentWithRoom {
