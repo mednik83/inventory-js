@@ -152,6 +152,60 @@ describe("Operations API", () => {
           "Expected array of operations",
         );
       });
+      describe("Move operations", () => {
+        it("should return moved operations with equipment id", async () => {
+          const room = await request(app)
+            .post("/rooms")
+            .set("Content-Type", "application/json")
+            .send({ name: "Room 204" })
+            .expect(201);
+
+          const newRoom = await request(app)
+            .post("/rooms")
+            .set("Content-Type", "application/json")
+            .send({ name: "Room 504" })
+            .expect(201);
+
+          const eq = await request(app)
+            .post(`/equipments`)
+            .set("Content-Type", "application/json")
+            .send({
+              name: testEquipment.name,
+              room_id: room.body.id,
+              status: testEquipment.status,
+            })
+            .expect(201);
+
+          const moved = await request(app)
+            .post(`/equipments/${eq.body.id}/move`)
+            .set("Content-Type", "application/json")
+            .send({
+              room_id: newRoom.body.id,
+            })
+            .expect(200);
+
+          const operations = await request(app)
+            .get(`/operations?equipment_id=${eq.body.id}`)
+            .expect(200);
+
+          assert.ok(
+            Array.isArray(operations.body),
+            "Expected array of operations",
+          );
+        });
+        it("should return [] moved operations with no exists equipment id", async () => {
+          const operations = await request(app)
+            .get(`/operations?equipment_id=999999`)
+            .expect(200);
+
+          assert.ok(
+            Array.isArray(operations.body),
+            "Expected array of operations",
+          );
+
+          assert.strictEqual(0, operations.body.length);
+        });
+      });
     });
   });
 });
