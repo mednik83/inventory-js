@@ -23,6 +23,10 @@ equipmentRouter.put("/:id", (req, res, next) => {
   equipmentController.update(req, res, next);
 });
 
+equipmentRouter.post("/:id/move", (req, res, next) => {
+  equipmentController.move(req, res, next);
+});
+
 equipmentRouter.post("/:id/write-off", (req, res, next) => {
   equipmentController.writeOff(req, res, next);
 });

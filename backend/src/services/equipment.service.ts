@@ -226,6 +226,27 @@ class EquipmentService {
     return equipmentData;
   }
 
+  move(equipmentId: unknown, data: unknown): EquipmentWithRoom {
+    const validEquipmentId = validateId(equipmentId);
+
+    const { room_id } = data as Record<string, unknown>;
+
+    const validRoomId = validateId(room_id);
+
+    const equipment = this.getById(validEquipmentId); // validate equipment id
+    const room = roomService.getById(validRoomId); // validate room id
+
+    equipmentRepository.updateRoom(validEquipmentId, validRoomId);
+
+    operationService.create({
+      equipment_id: validEquipmentId,
+      type: "move",
+      comment: `Equipment "${equipment.name}" was moved from ${equipment.name} to ${room.name}`,
+    });
+
+    return this.getById(equipmentId);
+  }
+
   writeOff(id: unknown): EquipmentWithRoom {
     const equipmentId = validateId(id);
     const equipment = this.getById(equipmentId);

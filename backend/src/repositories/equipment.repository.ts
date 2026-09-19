@@ -114,9 +114,9 @@ class EquipmentRepository {
     const result = db
       .prepare(
         `
-        UPDATE equipments
-        SET room_id = ?
-        WHERE id = ?
+      UPDATE equipments
+      SET room_id = ?
+      WHERE id = ?
       `,
       )
       .run(roomId, id);

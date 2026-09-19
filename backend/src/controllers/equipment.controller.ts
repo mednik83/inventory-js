@@ -52,6 +52,16 @@ class EquipmentController {
     }
   }
 
+  move(req: Request, res: Response, next: NextFunction): void {
+    try {
+      const equipment = equipmentService.move(req.params.id, req.body);
+
+      res.status(200).json(equipment);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   writeOff(req: Request, res: Response, next: NextFunction): void {
     try {
       const equipment: EquipmentWithRoom = equipmentService.writeOff(
