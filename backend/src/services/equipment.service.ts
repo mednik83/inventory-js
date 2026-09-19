@@ -229,11 +229,24 @@ class EquipmentService {
   move(equipmentId: unknown, data: unknown): EquipmentWithRoom {
     const validEquipmentId = validateId(equipmentId);
 
+    if (typeof data !== "object" || data === null) {
+      throw new ValidationError("Invalid data");
+    }
+
     const { room_id } = data as Record<string, unknown>;
 
     const validRoomId = validateId(room_id);
 
     const equipment = this.getById(validEquipmentId); // validate equipment id
+
+    if (equipment.status === "written_off") {
+      throw new ValidationError("Written off equipment cannot be moved");
+    }
+
+    if (validRoomId === equipment.room_id) {
+      throw new ValidationError("Equipment is already in the specified room");
+    }
+
     const room = roomService.getById(validRoomId); // validate room id
 
     equipmentRepository.updateRoom(validEquipmentId, validRoomId);
@@ -241,10 +254,10 @@ class EquipmentService {
     operationService.create({
       equipment_id: validEquipmentId,
       type: "move",
-      comment: `Equipment "${equipment.name}" was moved from ${equipment.name} to ${room.name}`,
+      comment: `Equipment "${equipment.name}" was moved from ${equipment.room_name} to ${room.name}`,
     });
 
-    return this.getById(equipmentId);
+    return this.getById(validEquipmentId);
   }
 
   writeOff(id: unknown): EquipmentWithRoom {

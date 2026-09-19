@@ -559,7 +559,7 @@ describe("Equipment API", () => {
     });
   });
 
-  describe("/POST /equipments/:id/move", () => {
+  describe("POST /equipments/:id/move", () => {
     it("should return moved equipment", async () => {
       const equipment = await request(app)
         .post("/equipments")
@@ -579,11 +579,14 @@ describe("Equipment API", () => {
         })
         .expect(200);
 
+      const room = await request(app).get(`/rooms/${secondRoomId}`).expect(200);
+
       assert.strictEqual(movedEquipment.body.room_id, secondRoomId);
       assert.strictEqual(movedEquipment.body.name, testEquipment.name);
+      assert.strictEqual(movedEquipment.body.room_name, room.body.name);
     });
     it("should return 404 if id not exists on moved", async () => {
-      const equipment = await request(app)
+      await request(app)
         .post("/equipments")
         .set("Content-Type", "application/json")
         .send({
@@ -593,17 +596,19 @@ describe("Equipment API", () => {
         })
         .expect(201);
 
-      const movedEquipment = await request(app)
+      const res = await request(app)
         .post(`/equipments/999999/move`)
         .set("Content-Type", "application/json")
         .send({
           room_id: secondRoomId,
         })
         .expect(404);
+
+      assert.strictEqual(res.body.message, "Equipment not found");
     });
 
     it("should return 400 for invalid id on moved", async () => {
-      const equipment = await request(app)
+      await request(app)
         .post("/equipments")
         .set("Content-Type", "application/json")
         .send({
@@ -613,13 +618,14 @@ describe("Equipment API", () => {
         })
         .expect(201);
 
-      const movedEquipment = await request(app)
+      const res = await request(app)
         .post(`/equipments/abc/move`)
         .set("Content-Type", "application/json")
         .send({
           room_id: secondRoomId,
         })
         .expect(400);
+      assert.strictEqual(res.body.message, "Invalid ID");
     });
 
     it("should return 400 if equipment was written off moved", async () => {
@@ -637,13 +643,43 @@ describe("Equipment API", () => {
         .post(`/equipments/${equipment.body.id}/write-off`)
         .expect(200);
 
-      const movedEquipment = await request(app)
-        .post(`/equipments/abc/move`)
+      const res = await request(app)
+        .post(`/equipments/${equipment.body.id}/move`)
         .set("Content-Type", "application/json")
         .send({
           room_id: secondRoomId,
         })
         .expect(400);
+
+      assert.strictEqual(
+        res.body.message,
+        "Written off equipment cannot be moved",
+      );
+    });
+
+    it("should return 400 when moving equipment to its current room", async () => {
+      const equipment = await request(app)
+        .post("/equipments")
+        .set("Content-Type", "application/json")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect(201);
+
+      const res = await request(app)
+        .post(`/equipments/${equipment.body.id}/move`)
+        .set("Content-Type", "application/json")
+        .send({
+          room_id: firstRoomId,
+        })
+        .expect(400);
+
+      assert.strictEqual(
+        res.body.message,
+        "Equipment is already in the specified room",
+      );
     });
   });
 });
