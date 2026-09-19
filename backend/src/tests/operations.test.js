@@ -176,7 +176,7 @@ describe("Operations API", () => {
             })
             .expect(201);
 
-          const moved = await request(app)
+          await request(app)
             .post(`/equipments/${eq.body.id}/move`)
             .set("Content-Type", "application/json")
             .send({
@@ -188,10 +188,13 @@ describe("Operations API", () => {
             .get(`/operations?equipment_id=${eq.body.id}`)
             .expect(200);
 
-          assert.ok(
-            Array.isArray(operations.body),
-            "Expected array of operations",
+          const moveOperation = operations.body.find(
+            (op) => op.type === "move",
           );
+
+          assert.ok(moveOperation, "Expected a move operation in history");
+          assert.match(moveOperation.comment, /Room 204/);
+          assert.match(moveOperation.comment, /Room 504/);
         });
         it("should return [] moved operations with no exists equipment id", async () => {
           const operations = await request(app)
