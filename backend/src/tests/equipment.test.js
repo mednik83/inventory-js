@@ -2,6 +2,7 @@ import request from "supertest";
 import assert from "node:assert/strict";
 import { app } from "../app.js";
 import db from "../database/db.js";
+import { describe } from "node:test";
 
 describe("Equipment API", () => {
   let firstRoomId;
@@ -555,6 +556,94 @@ describe("Equipment API", () => {
         .expect(400);
 
       assert.strictEqual(res.body.message, "Malformed JSON");
+    });
+  });
+
+  describe("/POST /equipments/:id/move", () => {
+    it("should return moved equipment", async () => {
+      const equipment = await request(app)
+        .post("/equipments")
+        .set("Content-Type", "application/json")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect(201);
+
+      const movedEquipment = await request(app)
+        .post(`/equipments/${equipment.body.id}/move`)
+        .set("Content-Type", "application/json")
+        .send({
+          room_id: secondRoomId,
+        })
+        .expect(200);
+
+      assert.strictEqual(movedEquipment.body.room_id, secondRoomId);
+      assert.strictEqual(movedEquipment.body.name, testEquipment.name);
+    });
+    it("should return 404 if id not exists on moved", async () => {
+      const equipment = await request(app)
+        .post("/equipments")
+        .set("Content-Type", "application/json")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect(201);
+
+      const movedEquipment = await request(app)
+        .post(`/equipments/999999/move`)
+        .set("Content-Type", "application/json")
+        .send({
+          room_id: secondRoomId,
+        })
+        .expect(404);
+    });
+
+    it("should return 400 for invalid id on moved", async () => {
+      const equipment = await request(app)
+        .post("/equipments")
+        .set("Content-Type", "application/json")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect(201);
+
+      const movedEquipment = await request(app)
+        .post(`/equipments/abc/move`)
+        .set("Content-Type", "application/json")
+        .send({
+          room_id: secondRoomId,
+        })
+        .expect(400);
+    });
+
+    it("should return 400 if equipment was written off moved", async () => {
+      const equipment = await request(app)
+        .post("/equipments")
+        .set("Content-Type", "application/json")
+        .send({
+          name: testEquipment.name,
+          room_id: firstRoomId,
+          status: testEquipment.status,
+        })
+        .expect(201);
+
+      await request(app)
+        .post(`/equipments/${equipment.body.id}/write-off`)
+        .expect(200);
+
+      const movedEquipment = await request(app)
+        .post(`/equipments/abc/move`)
+        .set("Content-Type", "application/json")
+        .send({
+          room_id: secondRoomId,
+        })
+        .expect(400);
     });
   });
 });
