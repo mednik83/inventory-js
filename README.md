@@ -4,26 +4,33 @@ Inventory App — учебное fullstack-приложение для учёт�
 
 Приложение позволяет управлять оборудованием и комнатами: создавать, редактировать, удалять и просматривать данные, а также генерировать QR-коды для оборудования.
 
-Backend построен на Node.js + Express, данные хранятся в SQLite. Frontend — одностраничное приложение на чистом JavaScript (без фреймворков и сборщиков), взаимодействующее с API через Fetch.
+Backend построен на Node.js + Express, данные хранятся в SQLite. Frontend — React приложение взаимодействующее с API через Fetch.
 
 ---
 
 ## Возможности
 
 ### Оборудование
+
 - создание, редактирование и удаление оборудования
 - просмотр списка оборудования
 - просмотр оборудования по `id` и `uuid`
 - списание оборудования (soft delete со сменой статуса)
 - жёсткое удаление
 - генерация QR-кода по `uuid`
+- перемещение между комнатами
+- фильтры списка (status, room_id, limit)
+- история операций
+- списание необратимо в обе стороны
 
 ### Комнаты
+
 - создание, редактирование и удаление комнат
 - просмотр списка комнат
 - просмотр комнаты по `id`
 
 ### Дополнительно
+
 - хранение данных в SQLite
 - REST API для `rooms` и `equipments`
 - валидация входных данных
@@ -36,17 +43,22 @@ Backend построен на Node.js + Express, данные хранятся �
 ## Стек
 
 ### Frontend
-- HTML, CSS, JavaScript (ES-модули)
+
+- React 19, react-router 7, Vite 8
 - Fetch API
 - без фреймворков и сборщиков — только нативный браузер
 
 ### Backend
-- Node.js
+
+- TypeScript 5.9
+- Node 24
+- tsx
 - Express
 - SQLite (better-sqlite3)
 - CORS
 - Mocha, Supertest — тестирование
 - qrcode, uuid
+- ESLint 10
 
 ---
 
@@ -61,6 +73,8 @@ Backend разделён на слои:
 - `database` — подключение к БД и инициализация таблиц
 - `errors` — кастомные ошибки приложения
 - `utils` — общие вспомогательные функции
+- `middlewares` - middlewares
+- `types` - типы
 
 ---
 
@@ -84,71 +98,46 @@ Frontend написан на чистом JavaScript и организован �
 
 ---
 
-## Структура проекта
-
-```text
-inventory-js/
-  frontend/
-    index.html
-    css/
-      style.css
-    js/
-      api.js         — слой запросов к API
-      state.js       — состояние приложения + наблюдатель
-      render.js      — отрисовка UI из состояния
-      ui.js          — действия (actions)
-      main.js        — точка входа, роутинг
-  backend/
-    app.js
-    server.js
-    package.json
-    package-lock.json
-    database/
-      db.js
-      inventory.sqlite
-      inventory.test.sqlite
-    routes/
-      equipment.routes.js
-      room.routes.js
-    controllers/
-      equipment.controller.js
-      room.controller.js
-    services/
-      equipment.service.js
-      room.service.js
-      qr-code.service.js
-    repositories/
-      equipment.repository.js
-      room.repository.js
-    errors/
-      errors.js
-    utils/
-      error-handler.js
-      validate-id.js
-      validate-status.js
-      validate-uuid.js
-    tests/
-      equipment.test.js
-      equipment.uuid.test.js
-      room.test.js
-  README.md
-  .gitignore
-```
-
----
-
 ## Запуск
+
+Требуется **Node.js 24** (зафиксирован в `.nvmrc` / `.node-version`).
+На Node 26 не собирается `better-sqlite3`.
+
+```bash
+fnm use            # или nvm use
+```
 
 ### Backend
 
 ```bash
 cd backend
 npm install
-npm run start        # запускает сервер (по умолчанию http://localhost:8010)
-npm test         # прогон тестов CRUD API
+cp .env.example .env      # обязательно: npm start читает --env-file=.env
+npm start                 # http://localhost:8010
 ```
 
+### Тесты
+
+Тесты используют отдельную базу и свой env-файл:
+
+```bash
+cp .env.test.example .env.test
+npm test                  # 66 passing
+```
+
+`.env` и `.env.test` в `.gitignore` — в репозитории только `*.example`.
+
 ### Frontend
+
+```bash
+cd frontend-react
+npm install
+npm run dev
+```
+
+Адрес API — переменная `VITE_API_URL`, по умолчанию `http://localhost:8010`.
+
+## Legacy: frontend-vanilla
 
 Frontend использует ES-модули, поэтому его нужно открывать через локальный HTTP-сервер, а не через `file://` (иначе модули и запросы к API работать не будут).
 
@@ -159,4 +148,22 @@ python -m http.server 5500
 # затем открыть http://localhost:5500 в браузере
 ```
 
-Backend должен быть запущен на `http://localhost:8010` — адрес API задаётся в `js/api.js` (`BASE_URL`).
+## API
+
+Тело ошибки всегда `{ "message": string }`.
+400 — ошибка валидации, 404 — не найдено, 409 — конфликт состояния.
+
+| Метод               | Путь                                     | Ответ                                                                            |
+| ------------------- | ---------------------------------------- | -------------------------------------------------------------------------------- |
+| GET                 | `/equipments?status=&room_id=1,2&limit=` | 200 `[]`                                                                         |
+| GET                 | `/equipments/:id`                        | 200 / 400 / 404                                                                  |
+| GET                 | `/equipments/uuid/:uuid`                 | 200 / 400 / 404 — публичный lookup для сканера                                   |
+| GET                 | `/equipments/uuid/:uuid/qr`              | 200 `image/svg+xml`, внутри QR — только uuid                                     |
+| POST                | `/equipments`                            | 201; `written_off` на входе → 400                                                |
+| PUT                 | `/equipments/:id`                        | 200; списанное не редактируется → 400                                            |
+| POST                | `/equipments/:id/move`                   | 200, body `{ room_id }`; списанное → 400, та же комната → 400, комнаты нет → 404 |
+| POST                | `/equipments/:id/write-off`              | 200; повторное списание → 409                                                    |
+| DELETE              | `/equipments/:id`                        | 204 — полное удаление вместе с историей                                          |
+| GET/POST/PUT/DELETE | `/rooms`, `/rooms/:id`                   | удаление занятой комнаты → 409                                                   |
+| GET                 | `/operations?equipment_id=`              | 200 `[]`; без параметра → 400                                                    |
+| —                   | битый JSON в теле любого запроса         | 400 `{ "message": "Malformed JSON" }`                                            |
