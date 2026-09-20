@@ -102,9 +102,26 @@ function App() {
   };
 
   const handleWriteOffEquipment = async (id) => {
+    const isConfirm = window.confirm("Do you really want to write off it?");
+    if (!isConfirm) {
+      return;
+    }
     setLoading(true);
     try {
       await API.writeOffEquipment(id);
+      await loadData();
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleMoveEquipment = async (id, roomId) => {
+    setLoading(true);
+    try {
+      await API.moveEquipment(id, roomId);
       await loadData();
       setError("");
     } catch (err) {
@@ -159,6 +176,7 @@ function App() {
                 equipments={filteredEquipments}
                 handleDeleteEquipment={handleDeleteEquipment}
                 handleWriteOffEquipment={handleWriteOffEquipment}
+                handleMoveEquipment={handleMoveEquipment}
                 startEditEquipment={startEditEquipment}
                 error={error}
                 loading={loading}

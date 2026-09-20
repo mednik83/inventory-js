@@ -39,6 +39,14 @@ const API = {
       body: JSON.stringify(data),
     }),
 
+  moveEquipment: async (id, roomId) =>
+    request(`/equipments/${id}/move`, {
+      method: "POST",
+      body: JSON.stringify({
+        room_id: roomId,
+      }),
+    }),
+
   deleteEquipment: async (id) =>
     request(`/equipments/${id}`, {
       method: "DELETE",

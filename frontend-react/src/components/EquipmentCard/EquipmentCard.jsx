@@ -1,6 +1,20 @@
+import { useState } from "react";
 import "./EquipmentCard.css";
 
-function EquipmentCard({ equipment, onDelete, onEdit, onWriteOff }) {
+function EquipmentCard({
+  equipment,
+  rooms,
+  onDelete,
+  onEdit,
+  onWriteOff,
+  onMove,
+}) {
+  const [selectedRoomId, setSelectedRoomId] = useState("");
+
+  const availableRooms = rooms.filter((r) => r.id !== equipment.room_id);
+  const canMove =
+    availableRooms.length > 0 && equipment.status !== "written_off";
+
   return (
     <div className="equipment-card">
       <h2>
@@ -16,6 +30,31 @@ function EquipmentCard({ equipment, onDelete, onEdit, onWriteOff }) {
         <b>Equipment uuid:</b> {equipment.uuid}
       </p>
       <div className="buttons">
+        {canMove && (
+          <div className="move-block">
+            <select
+              value={selectedRoomId}
+              onChange={(e) => setSelectedRoomId(e.target.value)}
+            >
+              <option value="" disabled>
+                Select Room
+              </option>
+              {availableRooms.map((r) => (
+                <option key={r.id} value={Number(r.id)}>
+                  {r.name}
+                </option>
+              ))}
+            </select>
+            <button
+              className="success"
+              onClick={() => onMove(equipment.id, Number(selectedRoomId))}
+              disabled={!selectedRoomId}
+            >
+              Move
+            </button>
+          </div>
+        )}
+
         <button className="primary" onClick={() => onEdit(equipment)}>
           Edit
         </button>

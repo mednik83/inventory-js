@@ -11,6 +11,10 @@ function EquipmentForm({
   const [status, setStatus] = useState("active");
   const [roomId, setRoomId] = useState("");
 
+  const availableRooms = rooms.filter(
+    (r) => r.id !== editingEquipment?.room_id,
+  );
+
   useEffect(() => {
     if (editingEquipment) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -78,7 +82,7 @@ function EquipmentForm({
           <option value="" disabled hidden>
             Select Room
           </option>
-          {rooms.map((room) => {
+          {availableRooms.map((room) => {
             return (
               <option key={room.id} value={room.id}>
                 {room.name}

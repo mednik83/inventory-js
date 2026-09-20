@@ -15,6 +15,7 @@ function EquipmentPage({
   searchQuery,
   setSearchQuery,
   handleWriteOffEquipment,
+  handleMoveEquipment,
 }) {
   return (
     <>
@@ -37,6 +38,8 @@ function EquipmentPage({
           onWriteOff={handleWriteOffEquipment}
           onEdit={startEditEquipment}
           equipments={equipments}
+          rooms={rooms}
+          onMove={handleMoveEquipment}
         />
       )}
     </>
