@@ -11,9 +11,9 @@ function EquipmentCard({
 }) {
   const [selectedRoomId, setSelectedRoomId] = useState("");
 
+  const isWrittenOff = equipment.status === "written_off";
   const availableRooms = rooms.filter((r) => r.id !== equipment.room_id);
-  const canMove =
-    availableRooms.length > 0 && equipment.status !== "written_off";
+  const canMove = availableRooms.length > 0 && !isWrittenOff;
 
   return (
     <div className="equipment-card">
@@ -40,7 +40,7 @@ function EquipmentCard({
                 Select Room
               </option>
               {availableRooms.map((r) => (
-                <option key={r.id} value={Number(r.id)}>
+                <option key={r.id} value={r.id}>
                   {r.name}
                 </option>
               ))}
@@ -55,12 +55,20 @@ function EquipmentCard({
           </div>
         )}
 
-        <button className="primary" onClick={() => onEdit(equipment)}>
-          Edit
-        </button>
-        <button className="warning" onClick={() => onWriteOff(equipment.id)}>
-          Write off
-        </button>
+        {!isWrittenOff && (
+          <>
+            <button className="primary" onClick={() => onEdit(equipment)}>
+              Edit
+            </button>
+            <button
+              className="warning"
+              onClick={() => onWriteOff(equipment.id)}
+            >
+              Write off
+            </button>
+          </>
+        )}
+
         <button className="danger" onClick={() => onDelete(equipment.id)}>
           Delete
         </button>
