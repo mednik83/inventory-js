@@ -206,6 +206,10 @@ class EquipmentService {
 
     const currentEquipment = this.getById(equipmentId);
 
+    if (currentEquipment.status === "written_off") {
+      throw new ValidationError("Written off equipment cannot be updated");
+    }
+
     const room = roomService.getById(validData.room_id);
 
     const equipmentData = {

@@ -2,7 +2,6 @@ import request from "supertest";
 import assert from "node:assert/strict";
 import { app } from "../app.js";
 import db from "../database/db.js";
-import { describe } from "node:test";
 
 describe("Equipment API", () => {
   let firstRoomId;
@@ -216,6 +215,35 @@ describe("Equipment API", () => {
       assert.strictEqual(putRes.body.status, putEquipment.status);
       assert.ok(putRes.body.uuid);
       assert.strictEqual(putRes.body.uuid, createRes.body.uuid);
+    });
+
+    it("should return 400 when updating already written off equipment", async () => {
+      const createRes = await request(app)
+        .post("/equipments")
+        .send({
+          name: "Monitor",
+          room_id: firstRoomId,
+          status: "active",
+        })
+        .expect(201);
+
+      await request(app)
+        .post(`/equipments/${createRes.body.id}/write-off`)
+        .expect(200);
+
+      const res = await request(app)
+        .put(`/equipments/${createRes.body.id}`)
+        .send({
+          name: "Monitor",
+          room_id: secondRoomId,
+          status: "active",
+        })
+        .expect(400);
+
+      assert.strictEqual(
+        res.body.message,
+        "Written off equipment cannot be updated",
+      );
     });
 
     it("should return 400 when updating equipment to written_off status", async () => {
