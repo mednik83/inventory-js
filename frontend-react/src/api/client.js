@@ -55,12 +55,6 @@ const API = {
   writeOffEquipment: async (id) =>
     request(`/equipments/${id}/write-off`, { method: "POST" }),
 
-  getQRCode: async (uuid) => {
-    const res = await fetch(`${BASE_URL}/equipments/uuid/${uuid}/qr`);
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    return await res.text();
-  },
-
   getRooms: async () => request(`/rooms`),
 
   getRoomById: async (id) => request(`/rooms/${id}`),
@@ -78,6 +72,15 @@ const API = {
     }),
 
   deleteRoom: async (id) => request(`/rooms/${id}`, { method: "DELETE" }),
+
+  getOperations: async (equipmentId) =>
+    request(`/operations?equipment_id=${equipmentId}`),
+
+  getQRCode: async (uuid) => {
+    const res = await fetch(`${BASE_URL}/equipments/uuid/${uuid}/qr`);
+    if (!res.ok) throw new Error(`Error ${res.status}`);
+    return await res.text();
+  },
 };
 
 export default API;
