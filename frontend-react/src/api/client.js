@@ -78,7 +78,19 @@ const API = {
 
   getQRCode: async (uuid) => {
     const res = await fetch(`${BASE_URL}/equipments/uuid/${uuid}/qr`);
-    if (!res.ok) throw new Error(`Error ${res.status}`);
+
+    if (!res.ok) {
+      let message = `Error: ${res.status}`;
+      try {
+        const body = await res.json();
+        if (body?.message) {
+          message = body.message;
+        }
+      } catch {
+        message = `Error: ${res.status}`;
+      }
+      throw new Error(message);
+    }
     return await res.text();
   },
 };
