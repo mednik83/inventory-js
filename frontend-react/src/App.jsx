@@ -7,6 +7,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import EquipmentPage from "./pages/EquipmentPage/EquipmentPage";
 import RoomPage from "./pages/RoomPage/RoomPage";
 import NotFoundPage from "./pages/404/404";
+import EquipmentDetailsPage from "./pages/EquipmentDetailsPage/EquipmentDetailsPage";
 
 function App() {
   const [equipments, setEquipments] = useState([]);
@@ -182,6 +183,15 @@ function App() {
                 loading={loading}
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
+              />
+            }
+          />
+          <Route
+            path="/equipments/:uuid"
+            element={
+              <EquipmentDetailsPage
+                onMove={handleMoveEquipment}
+                onEdit={startEditEquipment}
               />
             }
           />
