@@ -208,6 +208,62 @@ describe("Operations API", () => {
 
           assert.strictEqual(0, operations.body.length);
         });
+        it("should return equipment operations newest first", async () => {
+          const room = await request(app)
+            .post("/rooms")
+            .set("Content-Type", "application/json")
+            .send({ name: "Room 204" })
+            .expect(201);
+
+          const newRoom = await request(app)
+            .post("/rooms")
+            .set("Content-Type", "application/json")
+            .send({ name: "Room 504" })
+            .expect(201);
+
+          const eq = await request(app)
+            .post("/equipments")
+            .set("Content-Type", "application/json")
+            .send({
+              name: testEquipment.name,
+              room_id: room.body.id,
+              status: testEquipment.status,
+            })
+            .expect(201);
+
+          await request(app)
+            .post(`/equipments/${eq.body.id}/move`)
+            .set("Content-Type", "application/json")
+            .send({ room_id: newRoom.body.id })
+            .expect(200);
+
+          await request(app)
+            .put(`/equipments/${eq.body.id}`)
+            .set("Content-Type", "application/json")
+            .send({
+              name: "Lg Monitor",
+              room_id: newRoom.body.id,
+              status: eq.body.status,
+            })
+            .expect(200);
+
+          await request(app)
+            .post(`/equipments/${eq.body.id}/write-off`)
+            .expect(200);
+
+          const operations = await request(app)
+            .get(`/operations?equipment_id=${eq.body.id}`)
+            .expect(200);
+
+          const opTypes = operations.body.map((op) => {
+            return op.type;
+          });
+
+          const currentOpTypes = ["write_off", "update", "move", "create"];
+
+          assert.strictEqual(operations.body.length, 4);
+          assert.deepStrictEqual(opTypes, currentOpTypes);
+        });
       });
     });
   });

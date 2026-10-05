@@ -11,8 +11,11 @@ async function request(url, options = {}) {
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Ошибка ${res.status}`);
+    const data = await res.json().catch(() => ({}));
+
+    const error = new Error(data.message || `HTTP ${res.status}`);
+    error.status = res.status;
+    throw error;
   }
 
   if (res.status === 204) return null;
@@ -55,12 +58,6 @@ const API = {
   writeOffEquipment: async (id) =>
     request(`/equipments/${id}/write-off`, { method: "POST" }),
 
-  getQRCode: async (uuid) => {
-    const res = await fetch(`${BASE_URL}/equipments/uuid/${uuid}/qr`);
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    return await res.text();
-  },
-
   getRooms: async () => request(`/rooms`),
 
   getRoomById: async (id) => request(`/rooms/${id}`),
@@ -78,6 +75,27 @@ const API = {
     }),
 
   deleteRoom: async (id) => request(`/rooms/${id}`, { method: "DELETE" }),
+
+  getOperations: async (equipmentId) =>
+    request(`/operations?equipment_id=${equipmentId}`),
+
+  getQRCode: async (uuid) => {
+    const res = await fetch(`${BASE_URL}/equipments/uuid/${uuid}/qr`);
+
+    if (!res.ok) {
+      let message = `Error: ${res.status}`;
+      try {
+        const body = await res.json();
+        if (body?.message) {
+          message = body.message;
+        }
+      } catch {
+        message = `Error: ${res.status}`;
+      }
+      throw new Error(message);
+    }
+    return await res.text();
+  },
 };
 
 export default API;

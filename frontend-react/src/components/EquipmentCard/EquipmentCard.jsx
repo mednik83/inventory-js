@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./EquipmentCard.css";
+import { Link } from "react-router-dom";
 
 function EquipmentCard({
   equipment,
@@ -18,7 +19,8 @@ function EquipmentCard({
   return (
     <div className="equipment-card">
       <h2>
-        <b>Equipment name:</b> {equipment.name}
+        <b>Equipment name:</b>{" "}
+        <Link to={`/equipments/${equipment.uuid}`}>{equipment.name}</Link>
       </h2>
       <p>
         <b>Room name:</b> {equipment.room_name}
@@ -57,9 +59,11 @@ function EquipmentCard({
 
         {!isWrittenOff && (
           <>
-            <button className="primary" onClick={() => onEdit(equipment)}>
-              Edit
-            </button>
+            {onEdit && (
+              <button className="primary" onClick={() => onEdit(equipment)}>
+                Edit
+              </button>
+            )}
             <button
               className="warning"
               onClick={() => onWriteOff(equipment.id)}
