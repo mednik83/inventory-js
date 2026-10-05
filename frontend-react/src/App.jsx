@@ -188,12 +188,7 @@ function App() {
           />
           <Route
             path="/equipments/:uuid"
-            element={
-              <EquipmentDetailsPage
-                onMove={handleMoveEquipment}
-                onEdit={startEditEquipment}
-              />
-            }
+            element={<EquipmentDetailsPage loadAppData={loadData} />}
           />
           <Route
             path="/rooms"

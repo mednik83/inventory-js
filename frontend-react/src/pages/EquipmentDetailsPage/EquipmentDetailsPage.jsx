@@ -1,10 +1,11 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import API from "../../api/client";
 import { useCallback, useEffect, useState } from "react";
 import EquipmentCard from "../../components/EquipmentCard/EquipmentCard";
 import Spinner from "../../components/Spinner/Spinner";
+import "./EquipmentDetailsPage.css";
 
-function EquipmentDetailsPage({ onEdit }) {
+function EquipmentDetailsPage({ loadAppData }) {
   const navigate = useNavigate();
 
   const { uuid } = useParams();
@@ -14,6 +15,7 @@ function EquipmentDetailsPage({ onEdit }) {
   const [rooms, setRooms] = useState([]);
   const [equipment, setEquipment] = useState(null);
   const [operations, setOperations] = useState([]);
+  const [qrcode, setQrcode] = useState("");
 
   const loadData = useCallback(async () => {
     try {
@@ -28,6 +30,9 @@ function EquipmentDetailsPage({ onEdit }) {
 
       const equipmentOperations = await API.getOperations(equipmentData.id);
       setOperations(equipmentOperations);
+
+      const qrcodeData = await API.getQRCode(equipmentData.uuid);
+      setQrcode(qrcodeData);
     } catch (err) {
       setError(err);
     } finally {
@@ -50,6 +55,7 @@ function EquipmentDetailsPage({ onEdit }) {
     }
     try {
       await API.writeOffEquipment(equipmentId);
+      await loadAppData();
       await loadData();
     } catch (err) {
       setError(err);
@@ -65,6 +71,7 @@ function EquipmentDetailsPage({ onEdit }) {
     }
     try {
       await API.deleteEquipment(equipmentId);
+      await loadAppData();
       navigate("/equipments");
     } catch (err) {
       setError(err);
@@ -74,6 +81,7 @@ function EquipmentDetailsPage({ onEdit }) {
   const handleMoveEquipment = async (equipmentId, roomId) => {
     try {
       await API.moveEquipment(equipmentId, roomId);
+      await loadAppData();
       await loadData();
     } catch (err) {
       setError(err);
@@ -81,6 +89,9 @@ function EquipmentDetailsPage({ onEdit }) {
   };
 
   if (loading) return <Spinner />;
+  if (error?.status === 404) {
+    return <Navigate to="/404" replace />;
+  }
   if (error) return <p>Error: {error.message}</p>;
   return (
     <div className="equipment_data">
@@ -88,10 +99,13 @@ function EquipmentDetailsPage({ onEdit }) {
         equipment={equipment}
         rooms={rooms}
         onDelete={handleDeleteEquipment}
-        onEdit={onEdit}
         onWriteOff={handleWriteOffEquipment}
         onMove={handleMoveEquipment}
       />
+      <div
+        className="qrcode"
+        dangerouslySetInnerHTML={{ __html: qrcode }}
+      ></div>
       <div className="operations">
         <h1>Operations:</h1>
         {operations.map((op) => {

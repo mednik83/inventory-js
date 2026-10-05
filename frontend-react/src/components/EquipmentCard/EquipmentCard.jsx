@@ -57,9 +57,11 @@ function EquipmentCard({
 
         {!isWrittenOff && (
           <>
-            <button className="primary" onClick={() => onEdit(equipment)}>
-              Edit
-            </button>
+            {onEdit && (
+              <button className="primary" onClick={() => onEdit(equipment)}>
+                Edit
+              </button>
+            )}
             <button
               className="warning"
               onClick={() => onWriteOff(equipment.id)}

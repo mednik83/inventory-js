@@ -11,8 +11,11 @@ async function request(url, options = {}) {
   });
 
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `Ошибка ${res.status}`);
+    const data = await res.json().catch(() => ({}));
+
+    const error = new Error(data.message || `HTTP ${res.status}`);
+    error.status = res.status;
+    throw error;
   }
 
   if (res.status === 204) return null;
