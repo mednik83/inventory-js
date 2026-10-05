@@ -55,8 +55,8 @@ function EquipmentDetailsPage({ loadAppData }) {
     }
     try {
       await API.writeOffEquipment(equipmentId);
-      await loadAppData();
       await loadData();
+      await loadAppData();
     } catch (err) {
       setError(err);
     }
@@ -81,8 +81,8 @@ function EquipmentDetailsPage({ loadAppData }) {
   const handleMoveEquipment = async (equipmentId, roomId) => {
     try {
       await API.moveEquipment(equipmentId, roomId);
-      await loadAppData();
       await loadData();
+      await loadAppData();
     } catch (err) {
       setError(err);
     }
