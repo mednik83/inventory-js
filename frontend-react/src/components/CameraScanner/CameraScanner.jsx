@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import "./CameraScanner.css";
+import { BrowserQRCodeReader } from "@zxing/browser";
 
 function CameraScanner({ onScan }) {
   const videoRef = useRef(null);
@@ -14,6 +15,7 @@ function CameraScanner({ onScan }) {
     let stream = null;
     let cancelled = false;
     let timerId = null;
+    let zxingControls = null;
 
     async function start() {
       try {
@@ -34,13 +36,28 @@ function CameraScanner({ onScan }) {
           return;
         } else if (error.name === "NotAllowedError") {
           setError("Camera access denied");
-          return;
         } else {
           setError(error.message);
         }
+        return;
       }
 
       if (!("BarcodeDetector" in window)) {
+        const reader = new BrowserQRCodeReader();
+        const controls = await reader.decodeFromVideoElement(
+          videoRef.current,
+          (result, err, ctrl) => {
+            if (result) {
+              ctrl.stop();
+              onScanRef.current(result.getText());
+            }
+          },
+        );
+        zxingControls = controls;
+        if (cancelled) {
+          controls.stop();
+          return;
+        }
         return;
       }
 
@@ -73,6 +90,7 @@ function CameraScanner({ onScan }) {
     return () => {
       cancelled = true;
       clearTimeout(timerId);
+      zxingControls?.stop();
       stream?.getTracks().forEach((t) => t.stop());
     };
   }, []);

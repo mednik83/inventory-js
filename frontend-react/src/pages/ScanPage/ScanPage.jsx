@@ -26,7 +26,7 @@ function ScanPage() {
 
       if (!isUuid(uuid)) {
         setError("Unknown code format");
-        setCount(count + 1);
+        setCount((c) => c + 1);
         return;
       }
 
@@ -34,7 +34,7 @@ function ScanPage() {
 
       navigate(`/equipments/${uuid}`);
     } catch (error) {
-      setCount(count + 1);
+      setCount((c) => c + 1);
       if (error?.status === 404) {
         setError("Equipment not found");
       } else {
