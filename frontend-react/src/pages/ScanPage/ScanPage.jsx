@@ -13,6 +13,7 @@ function isUuid(text) {
 function ScanPage() {
   const [text, setText] = useState("");
   const [error, setError] = useState("");
+  const [count, setCount] = useState(0);
 
   const navigate = useNavigate();
 
@@ -25,6 +26,7 @@ function ScanPage() {
 
       if (!isUuid(uuid)) {
         setError("Unknown code format");
+        setCount(count + 1);
         return;
       }
 
@@ -32,6 +34,7 @@ function ScanPage() {
 
       navigate(`/equipments/${uuid}`);
     } catch (error) {
+      setCount(count + 1);
       if (error?.status === 404) {
         setError("Equipment not found");
       } else {
@@ -67,7 +70,7 @@ function ScanPage() {
           ref={inputRef}
         />
       </form>
-      <CameraScanner onScan={handleScannedCode} />
+      <CameraScanner onScan={handleScannedCode} key={count} />
       <div>
         <span>{error}</span>
       </div>

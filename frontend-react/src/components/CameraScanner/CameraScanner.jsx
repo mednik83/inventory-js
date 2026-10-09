@@ -34,6 +34,7 @@ function CameraScanner({ onScan }) {
           return;
         } else if (error.name === "NotAllowedError") {
           setError("Camera access denied");
+          return;
         } else {
           setError(error.message);
         }
