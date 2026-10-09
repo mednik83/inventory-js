@@ -1,6 +1,13 @@
 import { useRef, useState } from "react";
 import API from "../../api/client";
 import { useNavigate } from "react-router-dom";
+import "./ScanPage.css";
+
+function isUuid(text) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+    text,
+  );
+}
 
 function ScanPage() {
   const [text, setText] = useState("");
@@ -10,19 +17,14 @@ function ScanPage() {
 
   const inputRef = useRef(null);
 
-  function validateUuid(text) {
-    return text.match(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
-    );
-  }
-
   async function handleScannedCode(text) {
     setError("");
     try {
       const uuid = text.trim();
 
-      if (!validateUuid(uuid)) {
-        throw new Error("uuid error");
+      if (!isUuid(uuid)) {
+        setError("Equipment not found");
+        return;
       }
 
       await API.getEquipmentByUuid(uuid);
@@ -31,10 +33,11 @@ function ScanPage() {
     } catch (error) {
       if (error?.status === 404) {
         setError("Not found");
+      } else {
+        setError(error.message);
       }
-      setError(error.message);
     } finally {
-      inputRef.current.focus();
+      inputRef.current?.focus();
     }
   }
 
@@ -45,13 +48,13 @@ function ScanPage() {
 
     if (!trimmedText) return;
 
-    handleScannedCode(text);
+    handleScannedCode(trimmedText);
 
     setText("");
   }
   return (
     <div>
-      <h1>Title</h1>
+      <h1>Scan page</h1>
       <form onSubmit={handleSubmit}>
         <label htmlFor="scan">scan</label>
         <input
