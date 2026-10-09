@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import "./CameraScanner.css";
 
 function CameraScanner() {
-  const scanRef = useRef(null);
+  const videoRef = useRef(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -17,14 +17,18 @@ function CameraScanner() {
         });
 
         if (cancelled) {
-          s.getTracks().forEach((t) => t.stop);
+          s.getTracks().forEach((t) => t.stop());
           return;
         }
 
         stream = s;
-        scanRef.current.srcObject = s;
+        videoRef.current.srcObject = s;
       } catch (error) {
-        setError(error.name);
+        if (cancelled) {
+          setError(error.name);
+        } else {
+          setError(error.message);
+        }
       }
     }
 
@@ -38,7 +42,7 @@ function CameraScanner() {
 
   return (
     <div>
-      <video ref={scanRef} autoPlay playsInline muted />
+      <video ref={videoRef} autoPlay playsInline muted />
       {error && <p>{error}</p>}
     </div>
   );
