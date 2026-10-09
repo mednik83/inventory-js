@@ -8,6 +8,7 @@ import EquipmentPage from "./pages/EquipmentPage/EquipmentPage";
 import RoomPage from "./pages/RoomPage/RoomPage";
 import NotFoundPage from "./pages/404/404";
 import EquipmentDetailsPage from "./pages/EquipmentDetailsPage/EquipmentDetailsPage";
+import ScanPage from "./pages/ScanPage/ScanPage";
 
 function App() {
   const [equipments, setEquipments] = useState([]);
@@ -204,6 +205,7 @@ function App() {
               />
             }
           />
+          <Route path="/scan" element={<ScanPage></ScanPage>} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
