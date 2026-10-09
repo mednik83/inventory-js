@@ -67,7 +67,7 @@ function ScanPage() {
           ref={inputRef}
         />
       </form>
-      <CameraScanner />
+      <CameraScanner onScan={handleScannedCode} />
       <div>
         <span>{error}</span>
       </div>
