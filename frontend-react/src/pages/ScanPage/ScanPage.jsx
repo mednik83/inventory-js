@@ -23,7 +23,7 @@ function ScanPage() {
       const uuid = text.trim();
 
       if (!isUuid(uuid)) {
-        setError("Equipment not found");
+        setError("Unknown code format");
         return;
       }
 
@@ -32,7 +32,7 @@ function ScanPage() {
       navigate(`/equipments/${uuid}`);
     } catch (error) {
       if (error?.status === 404) {
-        setError("Not found");
+        setError("Equipment not found");
       } else {
         setError(error.message);
       }
