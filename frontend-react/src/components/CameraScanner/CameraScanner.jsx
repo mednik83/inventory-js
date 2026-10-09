@@ -25,6 +25,8 @@ function CameraScanner() {
         videoRef.current.srcObject = s;
       } catch (error) {
         if (cancelled) {
+          return;
+        } else if (error.name === "NotAllowedError") {
           setError(error.name);
         } else {
           setError(error.message);
