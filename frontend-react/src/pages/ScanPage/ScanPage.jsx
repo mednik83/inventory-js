@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import API from "../../api/client";
 import { useNavigate } from "react-router-dom";
 import "./ScanPage.css";
+import CameraScanner from "../../components/CameraScanner/CameraScanner";
 
 function isUuid(text) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
@@ -66,6 +67,7 @@ function ScanPage() {
           ref={inputRef}
         />
       </form>
+      <CameraScanner />
       <div>
         <span>{error}</span>
       </div>
