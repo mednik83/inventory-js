@@ -1,0 +1,19 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8010:8010"
+    volumes:
+      - ./db-data:/app/data
+    environment:
+      - NODE_ENV=development
+      - DB_PATH=/app/data/inventory.sqlite
+
+  frontend:
+    build: ./frontend-react
+    ports:
+      - "8080:80"
+    volumes:
+      - /app/node_modules
+    depends_on:
+      - backend
