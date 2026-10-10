@@ -6,3 +6,4 @@ inventory.sqlite-wal
 .env
 .env.test
 *.sqlite*
+db-data
