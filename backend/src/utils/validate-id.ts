@@ -1,16 +1,6 @@
-import { ValidationError } from "../errors/errors.js";
+import { IdZod } from "../schemas/zod.js";
 
-export function validateId(id: unknown) {
-  let numericId: number;
-  if (typeof id === "string" || typeof id === "number") {
-    numericId = Number(id);
-  } else {
-    throw new ValidationError("Invalid ID");
-  }
-
-  if (!Number.isInteger(numericId) || numericId <= 0) {
-    throw new ValidationError("Invalid ID");
-  }
-
+export function validateId(id: unknown): number {
+  const numericId: number = IdZod.parse(id);
   return numericId;
 }
