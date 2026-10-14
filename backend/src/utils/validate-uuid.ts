@@ -1,14 +1,5 @@
-import { validate as uuidValidate } from "uuid";
-import { ValidationError } from "../errors/errors.js";
+import { UuidZod } from "../schemas/zod.js";
 
-export function validateUuid(uuid: unknown) {
-  if (typeof uuid !== "string") {
-    throw new ValidationError("Invalid uuid");
-  }
-
-  if (!uuidValidate(uuid)) {
-    throw new ValidationError("Invalid uuid");
-  }
-
-  return uuid;
+export function validateUuid(uuid: unknown): string {
+  return UuidZod.parse(uuid);
 }
