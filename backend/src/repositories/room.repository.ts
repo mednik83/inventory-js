@@ -22,7 +22,7 @@ class RoomRepository {
       .all() as Room[];
   }
 
-  findByName(name: string) {
+  findByName(name: string): Room | undefined {
     return db
       .prepare(
         `
@@ -30,7 +30,7 @@ class RoomRepository {
       WHERE name = ?
       `,
       )
-      .get(name);
+      .get(name) as Room | undefined;
   }
 
   findById(id: number): Room | undefined {
