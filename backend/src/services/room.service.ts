@@ -5,15 +5,14 @@ import {
 } from "../errors/errors.js";
 import { equipmentRepository } from "../repositories/equipment.repository.js";
 import { roomRepository } from "../repositories/room.repository.js";
-import { RoomZod } from "../schemas/zod.js";
-import { validateId } from "../utils/validate-id.js";
+import { IdZod, RoomZod } from "../schemas/zod.js";
 
 class RoomService {
   getAll() {
     return roomRepository.findAll();
   }
   getById(id: unknown) {
-    const roomId = validateId(id);
+    const roomId = IdZod.parse(id);
 
     const room = roomRepository.findById(roomId);
 
@@ -35,7 +34,7 @@ class RoomService {
   }
 
   update(id: unknown, data: unknown) {
-    const roomId = validateId(id);
+    const roomId = IdZod.parse(id);
     const validData = RoomZod.parse(data);
 
     const existing = roomRepository.findByName(validData.name);
@@ -58,7 +57,7 @@ class RoomService {
   }
 
   delete(id: unknown) {
-    const roomId = validateId(id);
+    const roomId = IdZod.parse(id);
 
     const room = roomRepository.findById(roomId);
 
