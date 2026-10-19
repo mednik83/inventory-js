@@ -57,5 +57,10 @@ export const OperationZod = z.object({
     .transform((val) => val || null),
 });
 
+export const MoveEquipmentZod = z.object(
+  { room_id: IdZod },
+  { error: "Invalid data" },
+);
+
 export type EquipmentBody = z.infer<typeof EquipmentZod>;
 export type RoomBody = z.infer<typeof RoomZod>;

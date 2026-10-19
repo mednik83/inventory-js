@@ -1,6 +1,5 @@
 import { equipmentRepository } from "../repositories/equipment.repository.js";
 import { roomService } from "./room.service.js";
-import { validateId } from "../utils/validate-id.js";
 import {
   ValidationError,
   NotFoundError,
@@ -192,7 +191,7 @@ class EquipmentService {
 
     const { room_id } = data as Record<string, unknown>;
 
-    const validRoomId = validateId(room_id);
+    const validRoomId = IdZod.parse(room_id);
 
     const equipment = this.getById(validEquipmentId); // validate equipment id
 
