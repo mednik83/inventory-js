@@ -7,7 +7,7 @@ export const IdZod = z
     z.coerce
       .number<string | number>({ error: "Invalid ID" })
       .int({ error: "Invalid ID" })
-      .positive({ error: "Invalid ID" }),
+      .positive({ error: "Id must contain only positive integers" }),
   );
 
 export const UuidZod = z.uuid({ error: "Invalid uuid" });
@@ -51,7 +51,7 @@ export const OperationZod = z.object({
       `Operation "${String(issue.input)}" is not allowed. Expected one of: ${ALLOWED_OPERATIONS.join(", ")}.`,
   }),
   comment: z
-    .string()
+    .string({ error: "Status must be a string" })
     .trim()
     .nullish()
     .transform((val) => val || null),

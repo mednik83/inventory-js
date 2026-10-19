@@ -18,6 +18,7 @@ import {
   EquipmentStatusZod,
   EquipmentZod,
   IdZod,
+  MoveEquipmentZod,
   UuidZod,
 } from "../schemas/zod.js";
 
@@ -185,13 +186,7 @@ class EquipmentService {
   move(equipmentId: unknown, data: unknown): EquipmentWithRoom {
     const validEquipmentId = IdZod.parse(equipmentId);
 
-    if (typeof data !== "object" || data === null) {
-      throw new ValidationError("Invalid data");
-    }
-
-    const { room_id } = data as Record<string, unknown>;
-
-    const validRoomId = IdZod.parse(room_id);
+    const validRoomId = MoveEquipmentZod.parse(data).room_id;
 
     const equipment = this.getById(validEquipmentId); // validate equipment id
 

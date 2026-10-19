@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 import { operationRepository } from "../repositories/operation.repository.js";
 import { IdZod, OperationZod } from "../schemas/zod.js";
 import { type Operation } from "../types.js";
