@@ -15,11 +15,11 @@ import type {
   EquipmentWithRoom,
 } from "../types.js";
 import {
-  EquipmentStatusZod,
   EquipmentZod,
   IdZod,
   MoveEquipmentZod,
   UuidZod,
+  filtersZod,
 } from "../schemas/zod.js";
 
 function validateFilters(filters: unknown): EquipmentFilters {
@@ -29,56 +29,13 @@ function validateFilters(filters: unknown): EquipmentFilters {
 
   const { limit, room_id, status } = filters as Record<string, unknown>;
 
-  const validFilters = {
-    limit: parsePositiveInteger(limit, "limit"),
-    roomIds: parseIdsList(room_id),
-    status: parseStatus(status),
-  };
+  const validFilters = filtersZod.parse({
+    limit: limit,
+    roomIds: room_id,
+    status: status,
+  });
 
   return validFilters;
-}
-
-function parsePositiveInteger(
-  value: unknown,
-  fieldName: string,
-): number | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  if (typeof value !== "string" && typeof value !== "number") {
-    throw new ValidationError(`${fieldName} must be an integer`);
-  }
-
-  const parsed = Number(value);
-
-  if (!Number.isInteger(parsed)) {
-    throw new ValidationError(`${fieldName} must be an integer`);
-  }
-
-  if (parsed <= 0) {
-    throw new ValidationError(`${fieldName} must be a positive integer`);
-  }
-
-  return parsed;
-}
-
-function parseIdsList(value: unknown): number[] | undefined {
-  if (value === undefined) {
-    return undefined;
-  }
-
-  if (typeof value !== "string") {
-    throw new ValidationError("room_id must contain only integers");
-  }
-
-  return value.split(",").map((id) => IdZod.parse(id));
-}
-
-function parseStatus(value: unknown) {
-  const statusField = EquipmentStatusZod.optional();
-  const result = statusField.parse(value);
-  return result;
 }
 
 class EquipmentService {

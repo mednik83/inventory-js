@@ -16,6 +16,22 @@ export const EquipmentStatusZod = z.enum(EQUIPMENT_STATUSES, {
   error: "Invalid status",
 });
 
+export const filtersZod = z.object({
+  limit: z.coerce
+    .number<string | number>({ error: "limit must be a positive integer" })
+    .int({ error: "room_id must contain only integers" })
+    .positive({ error: "room_id must contain only positive integers" })
+    .optional(),
+  roomIds: z
+    .string({ error: "room_id must contain only integers" })
+    .transform((s) => z.array(IdZod).parse(s.split(",").map((id) => id.trim())))
+    .optional(),
+  status: z
+    .string({ error: "Status must be a string" })
+    .pipe(EquipmentStatusZod)
+    .optional(),
+});
+
 export const EquipmentZod = z.object(
   {
     name: z
