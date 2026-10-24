@@ -37,8 +37,8 @@ equipmentRouter.delete("/:id", (req, res) => {
 
 // qr
 
-equipmentRouter.get("/uuid/:uuid/qr", (req, res, next) => {
-  return equipmentController.getQrByUuid(req, res, next);
+equipmentRouter.get("/uuid/:uuid/qr", (req, res) => {
+  return equipmentController.getQrByUuid(req, res);
 });
 
 export default equipmentRouter;

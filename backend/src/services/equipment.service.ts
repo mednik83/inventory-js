@@ -83,7 +83,7 @@ class EquipmentService {
       uuid: uuidv4(),
     };
 
-    const equipmentData = equipmentRepository.create(equipment);
+    const equipmentData = await equipmentRepository.create(equipment);
 
     if (!equipmentData) {
       throw new AppError("Failed to create equipment");

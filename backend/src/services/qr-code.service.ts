@@ -13,7 +13,7 @@ class QrCodeService {
   async generateSvg(text: unknown) {
     const validText = isText(text);
 
-    return qrcode.toString(validText, { type: "svg" });
+    return await qrcode.toString(validText, { type: "svg" });
   }
 }
 

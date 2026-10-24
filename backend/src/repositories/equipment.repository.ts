@@ -5,8 +5,11 @@ import type {
 } from "../types.ts";
 import db from "../database/db.js";
 
+/* eslint-disable @typescript-eslint/require-await -- до P5: тела синхронные (better-sqlite3) */
 class EquipmentRepository {
-  create(equipment: Omit<Equipment, "id">): EquipmentWithRoom | undefined {
+  async create(
+    equipment: Omit<Equipment, "id">,
+  ): Promise<EquipmentWithRoom | undefined> {
     const result = db
       .prepare(
         `
@@ -19,7 +22,7 @@ class EquipmentRepository {
     return this.findById(Number(result.lastInsertRowid));
   }
 
-  findByUuid(uuid: string): EquipmentWithRoom | undefined {
+  async findByUuid(uuid: string): Promise<EquipmentWithRoom | undefined> {
     return db
       .prepare(
         `
@@ -38,7 +41,7 @@ class EquipmentRepository {
       .get(uuid) as EquipmentWithRoom | undefined;
   }
 
-  findById(id: number): EquipmentWithRoom | undefined {
+  async findById(id: number): Promise<EquipmentWithRoom | undefined> {
     return db
       .prepare(
         `
@@ -57,7 +60,7 @@ class EquipmentRepository {
       .get(id) as EquipmentWithRoom | undefined;
   }
 
-  findAll(filters: EquipmentFilters = {}): EquipmentWithRoom[] {
+  async findAll(filters: EquipmentFilters = {}): Promise<EquipmentWithRoom[]> {
     let sql = `
       SELECT
         equipments.id,
@@ -96,7 +99,7 @@ class EquipmentRepository {
     return db.prepare(sql).all(...params) as EquipmentWithRoom[];
   }
 
-  update(equipment: Omit<Equipment, "uuid">): number {
+  async update(equipment: Omit<Equipment, "uuid">): Promise<number> {
     const result = db
       .prepare(
         `
@@ -110,7 +113,7 @@ class EquipmentRepository {
     return result.changes;
   }
 
-  updateRoom(id: number, roomId: number): number {
+  async updateRoom(id: number, roomId: number): Promise<number> {
     const result = db
       .prepare(
         `
@@ -124,7 +127,7 @@ class EquipmentRepository {
     return result.changes;
   }
 
-  countByRoomId(roomId: number): number {
+  async countByRoomId(roomId: number): Promise<number> {
     const row = db
       .prepare(`SELECT COUNT(*) AS count FROM equipments WHERE room_id = ?`)
       .get(roomId) as { count: number };
@@ -132,7 +135,7 @@ class EquipmentRepository {
     return row.count;
   }
 
-  deleteById(id: number): number {
+  async deleteById(id: number): Promise<number> {
     return db
       .prepare(
         `

@@ -1,8 +1,11 @@
 import db from "../database/db.js";
 import { Operation } from "../types.js";
 
+/* eslint-disable @typescript-eslint/require-await -- до P5: тела синхронные (better-sqlite3) */
 class OperationRepository {
-  create(operation: Pick<Operation, "equipment_id" | "type" | "comment">) {
+  async create(
+    operation: Pick<Operation, "equipment_id" | "type" | "comment">,
+  ) {
     if (!operation.comment) {
       return db
         .prepare(
@@ -23,7 +26,7 @@ class OperationRepository {
       .run(operation.equipment_id, operation.type, operation.comment);
   }
 
-  getByEquipmentId(equipmentId: number): Operation[] {
+  async getByEquipmentId(equipmentId: number): Promise<Operation[]> {
     return db
       .prepare(
         `
@@ -35,7 +38,7 @@ class OperationRepository {
       .all(equipmentId) as Operation[];
   }
 
-  deleteByEquipmentId(equipmentId: number) {
+  async deleteByEquipmentId(equipmentId: number) {
     return db
       .prepare(
         `

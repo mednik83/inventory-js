@@ -1,8 +1,9 @@
 import db from "../database/db.js";
 import { Room } from "../types.js";
 
+/* eslint-disable @typescript-eslint/require-await -- до P5: тела синхронные (better-sqlite3) */
 class RoomRepository {
-  findAll(limit: number = 0): Room[] {
+  async findAll(limit: number = 0): Promise<Room[]> {
     if (limit > 0) {
       return db
         .prepare(
@@ -22,7 +23,7 @@ class RoomRepository {
       .all() as Room[];
   }
 
-  findByName(name: string): Room | undefined {
+  async findByName(name: string): Promise<Room | undefined> {
     return db
       .prepare(
         `
@@ -33,7 +34,7 @@ class RoomRepository {
       .get(name) as Room | undefined;
   }
 
-  findById(id: number): Room | undefined {
+  async findById(id: number): Promise<Room | undefined> {
     return db
       .prepare(
         `
@@ -44,7 +45,7 @@ class RoomRepository {
       .get(id) as Room | undefined;
   }
 
-  create(room: Omit<Room, "id">) {
+  async create(room: Omit<Room, "id">) {
     const result = db
       .prepare(
         `
@@ -56,7 +57,7 @@ class RoomRepository {
     return this.findById(Number(result.lastInsertRowid));
   }
 
-  update(room: Room) {
+  async update(room: Room) {
     return db
       .prepare(
         `
@@ -68,7 +69,7 @@ class RoomRepository {
       .run(room.name, room.id);
   }
 
-  deleteById(id: number) {
+  async deleteById(id: number) {
     return db
       .prepare(
         `

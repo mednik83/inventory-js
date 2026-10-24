@@ -47,7 +47,7 @@ class RoomService {
       ...validData,
     };
 
-    const result = roomRepository.update(room);
+    const result = await roomRepository.update(room);
 
     if (result.changes === 0) {
       throw new NotFoundError("Room not found");

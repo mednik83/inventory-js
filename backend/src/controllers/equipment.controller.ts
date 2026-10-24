@@ -1,6 +1,6 @@
 import { equipmentService } from "../services/equipment.service.js";
 import { qrCodeService } from "../services/qr-code.service.js";
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 import type { EquipmentWithRoom } from "../types.js";
 import { UuidZod } from "../schemas/zod.js";
 
@@ -48,23 +48,14 @@ class EquipmentController {
     res.status(204).send();
   }
 
-  async getQrByUuid(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
-    const { uuid } = req.params;
+  async getQrByUuid(req: Request, res: Response): Promise<void> {
+    const validUuid = UuidZod.parse(req.params.uuid);
 
-    const validUuid = UuidZod.parse(uuid);
     const equipment = await equipmentService.getByUuid(validUuid);
 
-    qrCodeService
-      .generateSvg(equipment.uuid)
-      .then((qrSvg) => {
-        res.type("image/svg+xml");
-        res.send(qrSvg);
-      })
-      .catch(next);
+    const qrSvg = await qrCodeService.generateSvg(equipment.uuid);
+
+    res.type("image/svg+xml").send(qrSvg);
   }
 }
 
