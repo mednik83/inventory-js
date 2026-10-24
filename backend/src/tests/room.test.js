@@ -206,6 +206,62 @@ describe("Room API", () => {
       });
     });
 
+    describe("unique room", () => {
+      it("PUT. should allow saving room with its own name", async () => {
+        const createRoom = await request(app)
+          .post("/rooms")
+          .send({ name: "Room 101" })
+          .expect("Content-Type", /json/)
+          .expect(201);
+
+        const updateRoom = await request(app)
+          .put(`/rooms/${createRoom.body.id}`)
+          .send({
+            name: "Room 101",
+          })
+          .expect("Content-Type", /json/)
+          .expect(200);
+      });
+      it("PUT. should return 400 if name is taken by another room", async () => {
+        const createRoom = await request(app)
+          .post("/rooms")
+          .send({ name: "Room 101" })
+          .expect("Content-Type", /json/)
+          .expect(201);
+
+        const createNewRoom = await request(app)
+          .post("/rooms")
+          .send({
+            name: "Room 102",
+          })
+          .expect("Content-Type", /json/)
+          .expect(201);
+
+        const updateRoom = await request(app)
+          .put(`/rooms/${createNewRoom.body.id}`)
+          .send({ name: "Room 101" })
+          .expect("Content-Type", /json/)
+          .expect(400);
+
+        assert.strictEqual(updateRoom.body.message, "The room must be unique");
+      });
+      it("POST. Should return 400 if room is exists", async () => {
+        await request(app)
+          .post("/rooms")
+          .send({ name: "Room 101" })
+          .expect("Content-Type", /json/)
+          .expect(201);
+
+        const ErrorRoom = await request(app)
+          .post("/rooms")
+          .send({ name: "Room 101" })
+          .expect("Content-Type", /json/)
+          .expect(400);
+
+        assert.strictEqual(ErrorRoom.body.message, "The room must be unique");
+      });
+    });
+
     describe("room flow", () => {
       it("should create, get, update and delete room by id", async () => {
         const createRes = await request(app)

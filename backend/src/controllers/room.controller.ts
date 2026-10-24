@@ -1,6 +1,6 @@
+import { IdZod } from "../schemas/zod.js";
 import { roomService } from "../services/room.service.js";
 import { Room } from "../types.js";
-import { validateId } from "../utils/validate-id.js";
 import type { NextFunction, Request, Response } from "express";
 
 class RoomController {
@@ -15,7 +15,7 @@ class RoomController {
 
   getById(req: Request, res: Response, next: NextFunction): void {
     try {
-      const roomId: number = validateId(req.params.id);
+      const roomId: number = IdZod.parse(req.params.id);
 
       const room: Room = roomService.getById(roomId);
 

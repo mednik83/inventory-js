@@ -1,8 +1,8 @@
 import { equipmentService } from "../services/equipment.service.js";
 import { qrCodeService } from "../services/qr-code.service.js";
-import { validateUuid } from "../utils/validate-uuid.js";
 import type { NextFunction, Request, Response } from "express";
 import type { EquipmentWithRoom } from "../types.js";
+import { UuidZod } from "../schemas/zod.js";
 
 class EquipmentController {
   getById(req: Request, res: Response, next: NextFunction): void {
@@ -88,7 +88,7 @@ class EquipmentController {
     try {
       const { uuid } = req.params;
 
-      const validUuid = validateUuid(uuid);
+      const validUuid = UuidZod.parse(uuid);
       const equipment = equipmentService.getByUuid(validUuid);
 
       qrCodeService
