@@ -4,7 +4,7 @@ import { IdZod, OperationZod } from "../schemas/zod.js";
 import { type Operation } from "../types.js";
 
 class OperationService {
-  create(operation: {
+  async create(operation: {
     equipment_id: number;
     type: string;
     comment?: string | null;
@@ -14,17 +14,17 @@ class OperationService {
       comment: operation.comment,
     });
     const validEquipmentId = IdZod.parse(operation.equipment_id);
-    return operationRepository.create({
+    return await operationRepository.create({
       equipment_id: validEquipmentId,
       type: validOperation.type,
       comment: validOperation.comment || null,
     });
   }
 
-  getByEquipmentId(equipmentId: unknown): Operation[] {
+  async getByEquipmentId(equipmentId: unknown): Promise<Operation[]> {
     const validEquipmentId: number = IdZod.parse(equipmentId);
     const operations: Operation[] =
-      operationRepository.getByEquipmentId(validEquipmentId);
+      await operationRepository.getByEquipmentId(validEquipmentId);
 
     return operations;
   }

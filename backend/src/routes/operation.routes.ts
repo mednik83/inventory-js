@@ -3,8 +3,8 @@ import { operationController } from "../controllers/operation.controller.js";
 
 const operationRouter = express.Router();
 
-operationRouter.get("/", (req, res, next) => {
-  operationController.getByEquipmentId(req, res, next);
+operationRouter.get("/", (req, res) => {
+  return operationController.getByEquipmentId(req, res);
 });
 
 export default operationRouter;

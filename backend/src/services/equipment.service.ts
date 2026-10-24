@@ -39,9 +39,9 @@ function validateFilters(filters: unknown): EquipmentFilters {
 }
 
 class EquipmentService {
-  getById(id: unknown): EquipmentWithRoom {
+  async getById(id: unknown): Promise<EquipmentWithRoom> {
     const equipmentId = IdZod.parse(id);
-    const equipment = equipmentRepository.findById(equipmentId);
+    const equipment = await equipmentRepository.findById(equipmentId);
 
     if (!equipment) {
       throw new NotFoundError("Equipment not found");
@@ -50,9 +50,9 @@ class EquipmentService {
     return equipment;
   }
 
-  getByUuid(uuid: unknown): EquipmentWithRoom {
+  async getByUuid(uuid: unknown): Promise<EquipmentWithRoom> {
     const equipmentUuid = UuidZod.parse(uuid);
-    const equipment = equipmentRepository.findByUuid(equipmentUuid);
+    const equipment = await equipmentRepository.findByUuid(equipmentUuid);
 
     if (!equipment) {
       throw new NotFoundError("Equipment not found");
@@ -61,13 +61,13 @@ class EquipmentService {
     return equipment;
   }
 
-  getAll(filters: unknown) {
+  async getAll(filters: unknown) {
     const validFilters = validateFilters(filters);
 
-    return equipmentRepository.findAll(validFilters);
+    return await equipmentRepository.findAll(validFilters);
   }
 
-  create(data: unknown): EquipmentWithRoom {
+  async create(data: unknown): Promise<EquipmentWithRoom> {
     const validData = EquipmentZod.parse(data);
 
     if (validData.status === "written_off") {
@@ -76,7 +76,7 @@ class EquipmentService {
       );
     }
 
-    const room = roomService.getById(validData.room_id);
+    const room = await roomService.getById(validData.room_id);
 
     const equipment: Omit<Equipment, "id"> = {
       ...validData,
@@ -94,7 +94,7 @@ class EquipmentService {
       room_name: room.name,
     };
 
-    operationService.create({
+    await operationService.create({
       equipment_id: equipmentData.id,
       type: "create",
       comment: `Equipment "${equipmentData.name}" was created`,
@@ -103,7 +103,7 @@ class EquipmentService {
     return newEquipment;
   }
 
-  update(id: unknown, data: unknown): EquipmentWithRoom {
+  async update(id: unknown, data: unknown): Promise<EquipmentWithRoom> {
     const equipmentId = IdZod.parse(id);
 
     const validData = EquipmentZod.parse(data);
@@ -114,13 +114,13 @@ class EquipmentService {
       );
     }
 
-    const currentEquipment = this.getById(equipmentId);
+    const currentEquipment = await this.getById(equipmentId);
 
     if (currentEquipment.status === "written_off") {
       throw new ValidationError("Written off equipment cannot be updated");
     }
 
-    const room = roomService.getById(validData.room_id);
+    const room = await roomService.getById(validData.room_id);
 
     const equipmentData = {
       ...validData,
@@ -129,9 +129,9 @@ class EquipmentService {
       uuid: currentEquipment.uuid,
     };
 
-    equipmentRepository.update(equipmentData);
+    await equipmentRepository.update(equipmentData);
 
-    operationService.create({
+    await operationService.create({
       equipment_id: equipmentData.id,
       type: "update",
       comment: `Equipment "${equipmentData.name}" was updated`,
@@ -140,12 +140,12 @@ class EquipmentService {
     return equipmentData;
   }
 
-  move(equipmentId: unknown, data: unknown): EquipmentWithRoom {
+  async move(equipmentId: unknown, data: unknown): Promise<EquipmentWithRoom> {
     const validEquipmentId = IdZod.parse(equipmentId);
 
     const validRoomId = MoveEquipmentZod.parse(data).room_id;
 
-    const equipment = this.getById(validEquipmentId); // validate equipment id
+    const equipment = await this.getById(validEquipmentId); // validate equipment id
 
     if (equipment.status === "written_off") {
       throw new ValidationError("Written off equipment cannot be moved");
@@ -155,22 +155,22 @@ class EquipmentService {
       throw new ValidationError("Equipment is already in the specified room");
     }
 
-    const room = roomService.getById(validRoomId); // validate room id
+    const room = await roomService.getById(validRoomId); // validate room id
 
-    equipmentRepository.updateRoom(validEquipmentId, validRoomId);
+    await equipmentRepository.updateRoom(validEquipmentId, validRoomId);
 
-    operationService.create({
+    await operationService.create({
       equipment_id: validEquipmentId,
       type: "move",
       comment: `Equipment "${equipment.name}" was moved from ${equipment.room_name} to ${room.name}`,
     });
 
-    return this.getById(validEquipmentId);
+    return await this.getById(validEquipmentId);
   }
 
-  writeOff(id: unknown): EquipmentWithRoom {
+  async writeOff(id: unknown): Promise<EquipmentWithRoom> {
     const equipmentId = IdZod.parse(id);
-    const equipment = this.getById(equipmentId);
+    const equipment = await this.getById(equipmentId);
 
     if (equipment.status === "written_off") {
       throw new ConflictError("The equipment has already been written off.");
@@ -181,9 +181,9 @@ class EquipmentService {
       status: "written_off",
     };
 
-    equipmentRepository.update(equipmentData);
+    await equipmentRepository.update(equipmentData);
 
-    operationService.create({
+    await operationService.create({
       equipment_id: equipmentId,
       type: "write_off",
       comment: `Equipment "${equipmentData.name}" was written off`,
@@ -192,13 +192,13 @@ class EquipmentService {
     return equipmentData;
   }
 
-  forceDelete(id: unknown): boolean {
+  async forceDelete(id: unknown): Promise<boolean> {
     const equipmentId = IdZod.parse(id);
-    this.getById(equipmentId); // validate id
+    await this.getById(equipmentId); // validate id
 
-    operationRepository.deleteByEquipmentId(equipmentId);
+    await operationRepository.deleteByEquipmentId(equipmentId);
 
-    equipmentRepository.deleteById(equipmentId);
+    await equipmentRepository.deleteById(equipmentId);
 
     return true;
   }
