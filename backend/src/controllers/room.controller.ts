@@ -1,56 +1,33 @@
 import { IdZod } from "../schemas/zod.js";
 import { roomService } from "../services/room.service.js";
 import { Room } from "../types.js";
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 
 class RoomController {
-  getAll(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const rooms: Room[] = roomService.getAll();
-      res.json(rooms);
-    } catch (error) {
-      next(error);
-    }
+  async getAll(req: Request, res: Response): Promise<void> {
+    const rooms: Room[] = await roomService.getAll();
+    res.json(rooms);
   }
 
-  getById(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const roomId: number = IdZod.parse(req.params.id);
-
-      const room: Room = roomService.getById(roomId);
-
-      res.json(room);
-    } catch (error) {
-      next(error);
-    }
+  async getById(req: Request, res: Response): Promise<void> {
+    const roomId: number = IdZod.parse(req.params.id);
+    const room: Room = await roomService.getById(roomId);
+    res.json(room);
   }
 
-  create(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const room: Room | undefined = roomService.create(req.body);
-      res.status(201).json(room);
-    } catch (error) {
-      next(error);
-    }
+  async create(req: Request, res: Response): Promise<void> {
+    const room: Room | undefined = await roomService.create(req.body);
+    res.status(201).json(room);
   }
 
-  update(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const room: Room = roomService.update(req.params.id, req.body);
-
-      res.status(200).json(room);
-    } catch (error) {
-      next(error);
-    }
+  async update(req: Request, res: Response): Promise<void> {
+    const room: Room = await roomService.update(req.params.id, req.body);
+    res.status(200).json(room);
   }
 
-  delete(req: Request, res: Response, next: NextFunction): void {
-    try {
-      roomService.delete(req.params.id);
-      res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
+  async delete(req: Request, res: Response): Promise<void> {
+    await roomService.delete(req.params.id);
+    res.status(204).send();
   }
 }
 
