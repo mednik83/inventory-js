@@ -41,9 +41,6 @@ function EquipmentDetailsPage({ loadAppData }) {
   }, [uuid]);
 
   useEffect(() => {
-    // Загрузка данных по параметру маршрута: эффект здесь по назначению —
-    // синхронизация с адресом, внешних систем нет, каскад ограничен одним циклом.
-    // Правильное решение — библиотека данных (react-query), отложено: новая зависимость.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
