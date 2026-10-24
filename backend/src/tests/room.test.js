@@ -207,7 +207,7 @@ describe("Room API", () => {
     });
 
     describe("unique room", () => {
-      it("PUT. should return 400 if name is taken by another room", async () => {
+      it("PUT. should allow saving room with its own name", async () => {
         const createRoom = await request(app)
           .post("/rooms")
           .send({ name: "Room 101" })
@@ -222,7 +222,7 @@ describe("Room API", () => {
           .expect("Content-Type", /json/)
           .expect(200);
       });
-      it("POST. should return 400 if room existing", async () => {
+      it("PUT. should return 400 if name is taken by another room", async () => {
         const createRoom = await request(app)
           .post("/rooms")
           .send({ name: "Room 101" })
@@ -244,6 +244,21 @@ describe("Room API", () => {
           .expect(400);
 
         assert.strictEqual(updateRoom.body.message, "The room must be unique");
+      });
+      it("POST. Should return 400 if room is exists", async () => {
+        await request(app)
+          .post("/rooms")
+          .send({ name: "Room 101" })
+          .expect("Content-Type", /json/)
+          .expect(201);
+
+        const ErrorRoom = await request(app)
+          .post("/rooms")
+          .send({ name: "Room 101" })
+          .expect("Content-Type", /json/)
+          .expect(400);
+
+        assert.strictEqual(ErrorRoom.body.message, "The room must be unique");
       });
     });
 
