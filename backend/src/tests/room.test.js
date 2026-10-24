@@ -252,13 +252,13 @@ describe("Room API", () => {
           .expect("Content-Type", /json/)
           .expect(201);
 
-        const ErrorRoom = await request(app)
+        const errorRoom = await request(app)
           .post("/rooms")
           .send({ name: "Room 101" })
           .expect("Content-Type", /json/)
           .expect(400);
 
-        assert.strictEqual(ErrorRoom.body.message, "The room must be unique");
+        assert.strictEqual(errorRoom.body.message, "The room must be unique");
       });
     });
 
