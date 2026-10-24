@@ -7,8 +7,15 @@ export const IdZod = z
     z.coerce
       .number<string | number>({ error: "Invalid ID" })
       .int({ error: "Invalid ID" })
-      .positive({ error: "Id must contain only positive integers" }),
+      .positive({ error: "Invalid ID" }),
   );
+
+export const RoomIdItemZod = z.coerce
+  .number<string>({
+    error: "room_id must contain only integers",
+  })
+  .int({ error: "room_id must contain only integers" })
+  .positive({ error: "room_id must contain only positive integers" });
 
 export const UuidZod = z.uuid({ error: "Invalid uuid" });
 
@@ -18,13 +25,14 @@ export const EquipmentStatusZod = z.enum(EQUIPMENT_STATUSES, {
 
 export const filtersZod = z.object({
   limit: z.coerce
-    .number<string | number>({ error: "limit must be a positive integer" })
-    .int({ error: "room_id must contain only integers" })
-    .positive({ error: "room_id must contain only positive integers" })
+    .number<string | number>({ error: "limit must be an integer" })
+    .int({ error: "limit must be an integer" })
+    .positive({ error: "limit must be a positive integer" })
     .optional(),
   roomIds: z
     .string({ error: "room_id must contain only integers" })
-    .transform((s) => z.array(IdZod).parse(s.split(",").map((id) => id.trim())))
+    .transform((s) => s.split(","))
+    .pipe(z.array(RoomIdItemZod))
     .optional(),
   status: z
     .string({ error: "Status must be a string" })
