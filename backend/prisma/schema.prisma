@@ -6,3 +6,36 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Equipment {
+  id      Int    @id @default(autoincrement())
+  uuid    String @unique
+  name    String
+  room_id Int
+  room    Room   @relation(fields: [room_id], references: [id])
+  status  String
+
+  operations Operation[]
+
+  @@map("equipments")
+}
+
+model Room {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  equipments Equipment[]
+
+  @@map("rooms")
+}
+
+model Operation {
+  id           Int       @id @default(autoincrement())
+  equipment_id Int
+  equipment    Equipment @relation(fields: [equipment_id], references: [id])
+  type         String
+  comment      String?
+  created_at   DateTime  @default(now()) @db.Timestamptz(3)
+
+  @@map("operations")
+}
