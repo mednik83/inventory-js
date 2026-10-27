@@ -1,83 +1,35 @@
-import db from "../database/db.js";
 import { Room } from "../types.js";
 
-/* eslint-disable @typescript-eslint/require-await -- до P5: тела синхронные (better-sqlite3) */
+import { prisma } from "../database/prisma.js";
+
 class RoomRepository {
   async findAll(limit: number = 0): Promise<Room[]> {
-    if (limit > 0) {
-      return db
-        .prepare(
-          `
-        SELECT * FROM rooms
-        LIMIT ?
-        `,
-        )
-        .all(limit) as Room[];
-    }
-    return db
-      .prepare(
-        `
-    SELECT * FROM rooms
-    `,
-      )
-      .all() as Room[];
+    return await prisma.room.findMany({
+      take: limit > 0 ? limit : undefined,
+    });
   }
 
-  async findByName(name: string): Promise<Room | undefined> {
-    return db
-      .prepare(
-        `
-      SELECT * FROM rooms
-      WHERE name = ?
-      `,
-      )
-      .get(name) as Room | undefined;
+  async findByName(name: string): Promise<Room | null> {
+    return await prisma.room.findUnique({ where: { name } });
   }
 
-  async findById(id: number): Promise<Room | undefined> {
-    return db
-      .prepare(
-        `
-      SELECT * FROM rooms
-      WHERE id = ?
-      `,
-      )
-      .get(id) as Room | undefined;
+  async findById(id: number): Promise<Room | null> {
+    return await prisma.room.findUnique({ where: { id } });
   }
 
-  async create(room: Omit<Room, "id">) {
-    const result = db
-      .prepare(
-        `
-      INSERT INTO rooms (name)
-      VALUES (?)
-      `,
-      )
-      .run(room.name);
-    return this.findById(Number(result.lastInsertRowid));
+  async create(room: Omit<Room, "id">): Promise<Room> {
+    return await prisma.room.create({ data: room });
   }
 
-  async update(room: Room) {
-    return db
-      .prepare(
-        `
-      UPDATE rooms
-      SET name = ?
-      WHERE id = ?
-      `,
-      )
-      .run(room.name, room.id);
+  async update(room: Room): Promise<Room> {
+    return await prisma.room.update({
+      where: { id: room.id },
+      data: { name: room.name },
+    });
   }
 
-  async deleteById(id: number) {
-    return db
-      .prepare(
-        `
-      DELETE FROM rooms
-      WHERE id = ?
-      `,
-      )
-      .run(id);
+  async deleteById(id: number): Promise<Room> {
+    return await prisma.room.delete({ where: { id } });
   }
 }
 

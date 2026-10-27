@@ -1,13 +1,15 @@
 import * as z from "zod";
 import { EQUIPMENT_STATUSES, ALLOWED_OPERATIONS } from "../types.js";
 
+const PG_INT_MAX = 2_147_483_647;
 export const IdZod = z
   .union([z.string(), z.number()], { error: "Invalid ID" })
   .pipe(
     z.coerce
       .number<string | number>({ error: "Invalid ID" })
       .int({ error: "Invalid ID" })
-      .positive({ error: "Invalid ID" }),
+      .positive({ error: "Invalid ID" })
+      .max(PG_INT_MAX, { error: "Invalid ID" }),
   );
 
 export const RoomIdItemZod = z.coerce

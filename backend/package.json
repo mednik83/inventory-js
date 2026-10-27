@@ -5,9 +5,10 @@
   "main": "server.ts",
   "scripts": {
     "start": "nodemon --ext js,ts --exec tsx --env-file=.env ./src/server.ts",
-    "test": "mocha --import=tsx --env-file=.env.test ./src/tests/*",
+    "test": "node --import=tsx --import=./src/tests/env.ts node_modules/mocha/bin/mocha.js --require=./src/tests/setup.ts ./src/tests/*.test.js",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "db:generate": "prisma generate"
   },
   "keywords": [],
   "author": "",
