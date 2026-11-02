@@ -38,22 +38,21 @@ class RoomService {
     const validData = RoomZod.parse(data);
 
     const existing = await roomRepository.findByName(validData.name);
+
     if (existing && existing.id !== roomId) {
       throw new ValidationError("The room must be unique");
     }
+
+    await this.getById(roomId);
 
     const room = {
       id: roomId,
       ...validData,
     };
 
-    const result = await roomRepository.update(room);
+    const roomUpdated = await roomRepository.update(room);
 
-    if (result.changes === 0) {
-      throw new NotFoundError("Room not found");
-    }
-
-    return room;
+    return roomUpdated;
   }
 
   async delete(id: unknown) {

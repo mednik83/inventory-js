@@ -1,17 +1,12 @@
 import request from "supertest";
 import assert from "node:assert/strict";
 import { app } from "../app.js";
-import db from "../database/db.js";
 
 describe("Equipment API", () => {
   let firstRoomId;
   let secondRoomId;
 
   beforeEach(async () => {
-    db.prepare("DELETE FROM operations").run();
-    db.prepare("DELETE FROM equipments").run();
-    db.prepare("DELETE FROM rooms").run();
-
     const firstRoomRes = await request(app)
       .post("/rooms")
       .send({ name: "Room 101" })
@@ -178,7 +173,7 @@ describe("Equipment API", () => {
 
     it("should return 404 if equipment does not exist", async () => {
       await request(app)
-        .get("/equipments/9999999999")
+        .get("/equipments/999999")
         .expect("Content-Type", /json/)
         .expect(404);
     });
@@ -300,7 +295,7 @@ describe("Equipment API", () => {
 
     it("should return 404 if equipment does not exist", async () => {
       await request(app)
-        .put("/equipments/9999999999")
+        .put("/equipments/999999")
         .send({
           name: "Ghost",
           room_id: firstRoomId,
@@ -308,6 +303,18 @@ describe("Equipment API", () => {
         })
         .expect("Content-Type", /json/)
         .expect(404);
+    });
+
+    it("should return 400 if id is more then 2_147_483_647", async () => {
+      await request(app)
+        .put("/equipments/9999999999")
+        .send({
+          name: "Ghost",
+          room_id: firstRoomId,
+          status: "active",
+        })
+        .expect("Content-Type", /json/)
+        .expect(400);
     });
 
     it("should return 404 if room does not exist on update", async () => {
@@ -361,7 +368,7 @@ describe("Equipment API", () => {
 
     it("should return 404 if equipment does not exist on delete", async () => {
       await request(app)
-        .delete("/equipments/9999999999")
+        .delete("/equipments/999999")
         .expect("Content-Type", /json/)
         .expect(404);
     });

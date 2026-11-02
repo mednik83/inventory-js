@@ -77,7 +77,7 @@ export const OperationZod = z.object({
       `Operation "${String(issue.input)}" is not allowed. Expected one of: ${ALLOWED_OPERATIONS.join(", ")}.`,
   }),
   comment: z
-    .string({ error: "Status must be a string" })
+    .string({ error: "comment must be a string" })
     .trim()
     .nullish()
     .transform((val) => val || null),

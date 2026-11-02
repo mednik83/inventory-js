@@ -1,52 +1,24 @@
-import db from "../database/db.js";
+import { prisma } from "../database/prisma.js";
 import { Operation } from "../types.js";
 
-/* eslint-disable @typescript-eslint/require-await -- до P5: тела синхронные (better-sqlite3) */
 class OperationRepository {
   async create(
     operation: Pick<Operation, "equipment_id" | "type" | "comment">,
-  ) {
-    if (!operation.comment) {
-      return db
-        .prepare(
-          `
-        INSERT INTO operations (equipment_id, type)
-        VALUES (?, ?)
-        `,
-        )
-        .run(operation.equipment_id, operation.type);
-    }
-    return db
-      .prepare(
-        `
-      INSERT INTO operations (equipment_id, type, comment)
-      VALUES (?, ?, ?)
-      `,
-      )
-      .run(operation.equipment_id, operation.type, operation.comment);
+  ): Promise<Operation> {
+    return await prisma.operation.create({ data: operation });
   }
 
   async getByEquipmentId(equipmentId: number): Promise<Operation[]> {
-    return db
-      .prepare(
-        `
-      SELECT * FROM operations
-      WHERE equipment_id = ?
-      ORDER BY created_at DESC, id DESC
-      `,
-      )
-      .all(equipmentId) as Operation[];
+    return await prisma.operation.findMany({
+      where: { equipment_id: equipmentId },
+      orderBy: { created_at: "desc" },
+    });
   }
 
-  async deleteByEquipmentId(equipmentId: number) {
-    return db
-      .prepare(
-        `
-      DELETE FROM operations
-      WHERE equipment_id = ?
-      `,
-      )
-      .run(equipmentId);
+  async deleteByEquipmentId(equipmentId: number): Promise<{ count: number }> {
+    return await prisma.operation.deleteMany({
+      where: { equipment_id: equipmentId },
+    });
   }
 }
 

@@ -3,147 +3,164 @@ import type {
   EquipmentFilters,
   EquipmentWithRoom,
 } from "../types.ts";
-import db from "../database/db.js";
+import { prisma } from "../database/prisma.js";
 
-/* eslint-disable @typescript-eslint/require-await -- до P5: тела синхронные (better-sqlite3) */
 class EquipmentRepository {
   async create(
     equipment: Omit<Equipment, "id">,
-  ): Promise<EquipmentWithRoom | undefined> {
-    const result = db
-      .prepare(
-        `
-      INSERT INTO equipments (uuid, name, room_id, status)
-      VALUES (?, ?, ?, ?)
-    `,
-      )
-      .run(equipment.uuid, equipment.name, equipment.room_id, equipment.status);
+  ): Promise<EquipmentWithRoom | null> {
+    const result = await prisma.equipment.create({ data: equipment });
 
-    return this.findById(Number(result.lastInsertRowid));
+    return this.findById(Number(result.id));
   }
 
-  async findByUuid(uuid: string): Promise<EquipmentWithRoom | undefined> {
-    return db
-      .prepare(
-        `
-      SELECT
-        equipments.id,
-        equipments.uuid,
-        equipments.name,
-        equipments.room_id,
-        rooms.name AS room_name,
-        equipments.status
-      FROM equipments
-      JOIN rooms ON rooms.id = equipments.room_id
-      WHERE equipments.uuid = ?
-      `,
-      )
-      .get(uuid) as EquipmentWithRoom | undefined;
+  async findByUuid(uuid: string): Promise<EquipmentWithRoom | null> {
+    const rows = await prisma.equipment.findUnique({
+      select: {
+        id: true,
+        name: true,
+        uuid: true,
+        room_id: true,
+        status: true,
+        room: { select: { name: true } },
+      },
+      where: {
+        uuid,
+      },
+    });
+
+    if (!rows) {
+      return null;
+    }
+
+    const result: EquipmentWithRoom = {
+      id: rows.id,
+      name: rows.name,
+      uuid: rows.uuid,
+      room_id: rows.room_id,
+      status: rows.status,
+      room_name: rows.room.name,
+    };
+
+    return result;
   }
 
-  async findById(id: number): Promise<EquipmentWithRoom | undefined> {
-    return db
-      .prepare(
-        `
-      SELECT
-        equipments.id,
-        equipments.uuid,
-        equipments.name,
-        equipments.room_id,
-        rooms.name AS room_name,
-        equipments.status
-      FROM equipments
-      JOIN rooms ON rooms.id = equipments.room_id
-      WHERE equipments.id = ?
-      `,
-      )
-      .get(id) as EquipmentWithRoom | undefined;
+  async findById(id: number): Promise<EquipmentWithRoom | null> {
+    const rows = await prisma.equipment.findUnique({
+      where: { id: id },
+      include: { room: { select: { name: true } } },
+    });
+
+    if (!rows) {
+      return null;
+    }
+
+    const result: EquipmentWithRoom = {
+      id: rows.id,
+      name: rows.name,
+      uuid: rows.uuid,
+      room_id: rows.room_id,
+      status: rows.status,
+      room_name: rows.room.name,
+    };
+
+    return result;
   }
 
   async findAll(filters: EquipmentFilters = {}): Promise<EquipmentWithRoom[]> {
-    let sql = `
-      SELECT
-        equipments.id,
-        equipments.uuid,
-        equipments.name,
-        equipments.room_id,
-        rooms.name AS room_name,
-        equipments.status
-      FROM equipments
-      JOIN rooms ON rooms.id = equipments.room_id
-    `;
+    const rows = await prisma.equipment.findMany({
+      where: {
+        room_id: { in: filters.roomIds },
+        status: filters.status,
+      },
+      take: filters.limit,
+      include: { room: { select: { name: true } } },
+      orderBy: { id: "asc" },
+    });
 
-    const conditions: string[] = [];
-    const params: (string | number)[] = [];
+    const result: EquipmentWithRoom[] = rows.map((row) => {
+      return {
+        id: row.id,
+        name: row.name,
+        uuid: row.uuid,
+        room_id: row.room_id,
+        status: row.status,
+        room_name: row.room.name,
+      };
+    });
 
-    if (filters.roomIds?.length) {
-      const placeholders = filters.roomIds.map(() => "?").join(", ");
-      conditions.push(`room_id IN (${placeholders})`);
-      params.push(...filters.roomIds);
-    }
-
-    if (filters.status) {
-      conditions.push("status = ?");
-      params.push(filters.status);
-    }
-
-    if (conditions.length > 0) {
-      sql += " WHERE " + conditions.join(" AND ");
-    }
-
-    if (filters.limit) {
-      sql += " LIMIT ?";
-      params.push(filters.limit);
-    }
-
-    return db.prepare(sql).all(...params) as EquipmentWithRoom[];
+    return result;
   }
 
-  async update(equipment: Omit<Equipment, "uuid">): Promise<number> {
-    const result = db
-      .prepare(
-        `
-      UPDATE equipments
-      SET name = ?, room_id = ?, status = ?
-      WHERE id = ?
-      `,
-      )
-      .run(equipment.name, equipment.room_id, equipment.status, equipment.id);
+  async update(equipment: Omit<Equipment, "uuid">): Promise<EquipmentWithRoom> {
+    const rows = await prisma.equipment.update({
+      where: { id: equipment.id },
+      data: {
+        name: equipment.name,
+        room_id: equipment.room_id,
+        status: equipment.status,
+      },
+      include: { room: { select: { name: true } } },
+    });
 
-    return result.changes;
+    const result: EquipmentWithRoom = {
+      id: rows.id,
+      name: rows.name,
+      uuid: rows.uuid,
+      room_id: rows.room_id,
+      status: rows.status,
+      room_name: rows.room.name,
+    };
+
+    return result;
   }
 
-  async updateRoom(id: number, roomId: number): Promise<number> {
-    const result = db
-      .prepare(
-        `
-      UPDATE equipments
-      SET room_id = ?
-      WHERE id = ?
-      `,
-      )
-      .run(roomId, id);
+  async updateRoom(id: number, roomId: number): Promise<EquipmentWithRoom> {
+    const rows = await prisma.equipment.update({
+      where: { id: id },
+      data: {
+        room_id: roomId,
+      },
+      include: { room: { select: { name: true } } },
+    });
 
-    return result.changes;
+    const result: EquipmentWithRoom = {
+      id: rows.id,
+      name: rows.name,
+      uuid: rows.uuid,
+      room_id: rows.room_id,
+      status: rows.status,
+      room_name: rows.room.name,
+    };
+
+    return result;
   }
 
   async countByRoomId(roomId: number): Promise<number> {
-    const row = db
-      .prepare(`SELECT COUNT(*) AS count FROM equipments WHERE room_id = ?`)
-      .get(roomId) as { count: number };
+    const total = await prisma.equipment.count({
+      where: { room_id: roomId },
+    });
 
-    return row.count;
+    return total;
   }
 
-  async deleteById(id: number): Promise<number> {
-    return db
-      .prepare(
-        `
-      DELETE FROM equipments
-      WHERE id = ?
-      `,
-      )
-      .run(id).changes;
+  async deleteById(id: number): Promise<EquipmentWithRoom> {
+    const rows = await prisma.equipment.delete({
+      where: {
+        id: id,
+      },
+      include: { room: { select: { name: true } } },
+    });
+
+    const result: EquipmentWithRoom = {
+      id: rows.id,
+      name: rows.name,
+      uuid: rows.uuid,
+      room_id: rows.room_id,
+      status: rows.status,
+      room_name: rows.room.name,
+    };
+    return result;
   }
 }
 

@@ -7,13 +7,19 @@ datasource db {
   provider = "postgresql"
 }
 
+enum EquipmentStatus {
+  active
+  inactive
+  written_off
+}
+
 model Equipment {
-  id      Int    @id @default(autoincrement())
-  uuid    String @unique
+  id      Int             @id @default(autoincrement())
+  uuid    String          @unique
   name    String
   room_id Int
-  room    Room   @relation(fields: [room_id], references: [id])
-  status  String
+  room    Room            @relation(fields: [room_id], references: [id])
+  status  EquipmentStatus
 
   operations Operation[]
 
@@ -29,13 +35,21 @@ model Room {
   @@map("rooms")
 }
 
+enum OperationType {
+  create
+  update
+  delete
+  move
+  write_off
+}
+
 model Operation {
-  id           Int       @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   equipment_id Int
-  equipment    Equipment @relation(fields: [equipment_id], references: [id])
-  type         String
+  equipment    Equipment     @relation(fields: [equipment_id], references: [id])
+  type         OperationType
   comment      String?
-  created_at   DateTime  @default(now()) @db.Timestamptz(3)
+  created_at   DateTime      @default(now()) @db.Timestamptz(3)
 
   @@map("operations")
 }
