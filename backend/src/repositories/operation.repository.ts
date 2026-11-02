@@ -11,7 +11,7 @@ class OperationRepository {
   async getByEquipmentId(equipmentId: number): Promise<Operation[]> {
     return await prisma.operation.findMany({
       where: { equipment_id: equipmentId },
-      orderBy: { created_at: "desc" },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
     });
   }
 

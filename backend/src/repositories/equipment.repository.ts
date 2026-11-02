@@ -6,6 +6,21 @@ import type {
 import { prisma } from "../database/prisma.js";
 
 class EquipmentRepository {
+  private toEquipmentWithRoom(
+    data: Equipment & { room: { name: string } },
+  ): EquipmentWithRoom {
+    return {
+      id: data.id,
+      name: data.name,
+      uuid: data.uuid,
+      room_id: data.room_id,
+      status: data.status,
+      room_name: data.room.name,
+    };
+  }
+
+  private withRoomName = { room: { select: { name: true } } } as const;
+
   async create(
     equipment: Omit<Equipment, "id">,
   ): Promise<EquipmentWithRoom | null> {
@@ -16,31 +31,17 @@ class EquipmentRepository {
 
   async findByUuid(uuid: string): Promise<EquipmentWithRoom | null> {
     const rows = await prisma.equipment.findUnique({
-      select: {
-        id: true,
-        name: true,
-        uuid: true,
-        room_id: true,
-        status: true,
-        room: { select: { name: true } },
-      },
       where: {
         uuid,
       },
+      include: this.withRoomName,
     });
 
     if (!rows) {
       return null;
     }
 
-    const result: EquipmentWithRoom = {
-      id: rows.id,
-      name: rows.name,
-      uuid: rows.uuid,
-      room_id: rows.room_id,
-      status: rows.status,
-      room_name: rows.room.name,
-    };
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
 
     return result;
   }
@@ -48,21 +49,14 @@ class EquipmentRepository {
   async findById(id: number): Promise<EquipmentWithRoom | null> {
     const rows = await prisma.equipment.findUnique({
       where: { id: id },
-      include: { room: { select: { name: true } } },
+      include: this.withRoomName,
     });
 
     if (!rows) {
       return null;
     }
 
-    const result: EquipmentWithRoom = {
-      id: rows.id,
-      name: rows.name,
-      uuid: rows.uuid,
-      room_id: rows.room_id,
-      status: rows.status,
-      room_name: rows.room.name,
-    };
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
 
     return result;
   }
@@ -74,19 +68,12 @@ class EquipmentRepository {
         status: filters.status,
       },
       take: filters.limit,
-      include: { room: { select: { name: true } } },
+      include: this.withRoomName,
       orderBy: { id: "asc" },
     });
 
     const result: EquipmentWithRoom[] = rows.map((row) => {
-      return {
-        id: row.id,
-        name: row.name,
-        uuid: row.uuid,
-        room_id: row.room_id,
-        status: row.status,
-        room_name: row.room.name,
-      };
+      return this.toEquipmentWithRoom(row);
     });
 
     return result;
@@ -100,17 +87,10 @@ class EquipmentRepository {
         room_id: equipment.room_id,
         status: equipment.status,
       },
-      include: { room: { select: { name: true } } },
+      include: this.withRoomName,
     });
 
-    const result: EquipmentWithRoom = {
-      id: rows.id,
-      name: rows.name,
-      uuid: rows.uuid,
-      room_id: rows.room_id,
-      status: rows.status,
-      room_name: rows.room.name,
-    };
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
 
     return result;
   }
@@ -121,17 +101,10 @@ class EquipmentRepository {
       data: {
         room_id: roomId,
       },
-      include: { room: { select: { name: true } } },
+      include: this.withRoomName,
     });
 
-    const result: EquipmentWithRoom = {
-      id: rows.id,
-      name: rows.name,
-      uuid: rows.uuid,
-      room_id: rows.room_id,
-      status: rows.status,
-      room_name: rows.room.name,
-    };
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
 
     return result;
   }
@@ -149,17 +122,10 @@ class EquipmentRepository {
       where: {
         id: id,
       },
-      include: { room: { select: { name: true } } },
+      include: this.withRoomName,
     });
 
-    const result: EquipmentWithRoom = {
-      id: rows.id,
-      name: rows.name,
-      uuid: rows.uuid,
-      room_id: rows.room_id,
-      status: rows.status,
-      room_name: rows.room.name,
-    };
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
     return result;
   }
 }
