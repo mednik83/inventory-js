@@ -110,7 +110,9 @@ function EquipmentDetailsPage({ loadAppData }) {
             <div key={op.id} className="operation">
               <p>type: {op.type}</p>
               <p>comment: {op.comment}</p>
-              <p>created at: {op.created_at}</p>
+              <p>
+                created at: {new Date(op.created_at).toLocaleString("ru-RU")}
+              </p>
             </div>
           );
         })}
