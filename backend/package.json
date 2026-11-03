@@ -8,7 +8,8 @@
     "test": "node --import=tsx --import=./src/tests/env.ts node_modules/mocha/bin/mocha.js --require=./src/tests/setup.ts ./src/tests/*.test.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "start:prod": "prisma migrate deploy && exec tsx ./src/server.ts"
   },
   "keywords": [],
   "author": "",
