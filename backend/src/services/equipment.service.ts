@@ -21,6 +21,8 @@ import {
   UuidZod,
   filtersZod,
 } from "../schemas/zod.js";
+import { prisma } from "../database/prisma.js";
+import { Prisma } from "../generated/prisma/client.js";
 
 function validateFilters(filters: unknown): EquipmentFilters {
   if (typeof filters !== "object" || filters === null) {
@@ -39,9 +41,12 @@ function validateFilters(filters: unknown): EquipmentFilters {
 }
 
 class EquipmentService {
-  async getById(id: unknown): Promise<EquipmentWithRoom> {
+  async getById(
+    id: unknown,
+    db?: Prisma.TransactionClient,
+  ): Promise<EquipmentWithRoom> {
     const equipmentId = IdZod.parse(id);
-    const equipment = await equipmentRepository.findById(equipmentId);
+    const equipment = await equipmentRepository.findById(equipmentId, db);
 
     if (!equipment) {
       throw new NotFoundError("Equipment not found");
@@ -83,24 +88,29 @@ class EquipmentService {
       uuid: uuidv4(),
     };
 
-    const equipmentData = await equipmentRepository.create(equipment);
+    return await prisma.$transaction(async (tx) => {
+      const equipmentData = await equipmentRepository.create(equipment, tx);
 
-    if (!equipmentData) {
-      throw new AppError("Failed to create equipment");
-    }
+      if (!equipmentData) {
+        throw new AppError("Failed to create equipment");
+      }
 
-    const newEquipment = {
-      ...equipmentData,
-      room_name: room.name,
-    };
+      const newEquipment = {
+        ...equipmentData,
+        room_name: room.name,
+      };
 
-    await operationService.create({
-      equipment_id: equipmentData.id,
-      type: "create",
-      comment: `Equipment "${equipmentData.name}" was created`,
+      await operationService.create(
+        {
+          equipment_id: equipmentData.id,
+          type: "create",
+          comment: `Equipment "${equipmentData.name}" was created`,
+        },
+        tx,
+      );
+
+      return newEquipment;
     });
-
-    return newEquipment;
   }
 
   async update(id: unknown, data: unknown): Promise<EquipmentWithRoom> {
@@ -129,15 +139,20 @@ class EquipmentService {
       uuid: currentEquipment.uuid,
     };
 
-    await equipmentRepository.update(equipmentData);
+    return await prisma.$transaction(async (tx) => {
+      await equipmentRepository.update(equipmentData, tx);
 
-    await operationService.create({
-      equipment_id: equipmentData.id,
-      type: "update",
-      comment: `Equipment "${equipmentData.name}" was updated`,
+      await operationService.create(
+        {
+          equipment_id: equipmentData.id,
+          type: "update",
+          comment: `Equipment "${equipmentData.name}" was updated`,
+        },
+        tx,
+      );
+
+      return equipmentData;
     });
-
-    return equipmentData;
   }
 
   async move(equipmentId: unknown, data: unknown): Promise<EquipmentWithRoom> {
@@ -157,15 +172,20 @@ class EquipmentService {
 
     const room = await roomService.getById(validRoomId); // validate room id
 
-    await equipmentRepository.updateRoom(validEquipmentId, validRoomId);
+    return await prisma.$transaction(async (tx) => {
+      await equipmentRepository.updateRoom(validEquipmentId, validRoomId, tx);
 
-    await operationService.create({
-      equipment_id: validEquipmentId,
-      type: "move",
-      comment: `Equipment "${equipment.name}" was moved from ${equipment.room_name} to ${room.name}`,
+      await operationService.create(
+        {
+          equipment_id: validEquipmentId,
+          type: "move",
+          comment: `Equipment "${equipment.name}" was moved from ${equipment.room_name} to ${room.name}`,
+        },
+        tx,
+      );
+
+      return await this.getById(validEquipmentId, tx);
     });
-
-    return await this.getById(validEquipmentId);
   }
 
   async writeOff(id: unknown): Promise<EquipmentWithRoom> {
@@ -181,26 +201,34 @@ class EquipmentService {
       status: "written_off",
     };
 
-    await equipmentRepository.update(equipmentData);
+    return await prisma.$transaction(async (tx) => {
+      await equipmentRepository.update(equipmentData, tx);
 
-    await operationService.create({
-      equipment_id: equipmentId,
-      type: "write_off",
-      comment: `Equipment "${equipmentData.name}" was written off`,
+      await operationService.create(
+        {
+          equipment_id: equipmentId,
+          type: "write_off",
+          comment: `Equipment "${equipmentData.name}" was written off`,
+        },
+        tx,
+      );
+
+      return equipmentData;
     });
-
-    return equipmentData;
   }
 
   async forceDelete(id: unknown): Promise<boolean> {
     const equipmentId = IdZod.parse(id);
-    await this.getById(equipmentId); // validate id
 
-    await operationRepository.deleteByEquipmentId(equipmentId);
+    return await prisma.$transaction(async (tx) => {
+      await this.getById(equipmentId, tx); // validate id
 
-    await equipmentRepository.deleteById(equipmentId);
+      await operationRepository.deleteByEquipmentId(equipmentId, tx);
 
-    return true;
+      await equipmentRepository.deleteById(equipmentId, tx);
+
+      return true;
+    });
   }
 }
 

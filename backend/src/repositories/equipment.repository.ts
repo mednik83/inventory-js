@@ -4,6 +4,7 @@ import type {
   EquipmentWithRoom,
 } from "../types.ts";
 import { prisma } from "../database/prisma.js";
+import { Prisma } from "../generated/prisma/client.js";
 
 class EquipmentRepository {
   private toEquipmentWithRoom(
@@ -23,10 +24,11 @@ class EquipmentRepository {
 
   async create(
     equipment: Omit<Equipment, "id">,
+    db: Prisma.TransactionClient = prisma,
   ): Promise<EquipmentWithRoom | null> {
-    const result = await prisma.equipment.create({ data: equipment });
+    const result = await db.equipment.create({ data: equipment });
 
-    return this.findById(Number(result.id));
+    return this.findById(Number(result.id), db);
   }
 
   async findByUuid(uuid: string): Promise<EquipmentWithRoom | null> {
@@ -46,8 +48,11 @@ class EquipmentRepository {
     return result;
   }
 
-  async findById(id: number): Promise<EquipmentWithRoom | null> {
-    const rows = await prisma.equipment.findUnique({
+  async findById(
+    id: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom | null> {
+    const rows = await db.equipment.findUnique({
       where: { id: id },
       include: this.withRoomName,
     });
@@ -79,8 +84,11 @@ class EquipmentRepository {
     return result;
   }
 
-  async update(equipment: Omit<Equipment, "uuid">): Promise<EquipmentWithRoom> {
-    const rows = await prisma.equipment.update({
+  async update(
+    equipment: Omit<Equipment, "uuid">,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom> {
+    const rows = await db.equipment.update({
       where: { id: equipment.id },
       data: {
         name: equipment.name,
@@ -95,8 +103,12 @@ class EquipmentRepository {
     return result;
   }
 
-  async updateRoom(id: number, roomId: number): Promise<EquipmentWithRoom> {
-    const rows = await prisma.equipment.update({
+  async updateRoom(
+    id: number,
+    roomId: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom> {
+    const rows = await db.equipment.update({
       where: { id: id },
       data: {
         room_id: roomId,
@@ -117,8 +129,11 @@ class EquipmentRepository {
     return total;
   }
 
-  async deleteById(id: number): Promise<EquipmentWithRoom> {
-    const rows = await prisma.equipment.delete({
+  async deleteById(
+    id: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom> {
+    const rows = await db.equipment.delete({
       where: {
         id: id,
       },

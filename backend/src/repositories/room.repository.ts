@@ -1,6 +1,7 @@
 import { Room } from "../types.js";
 
 import { prisma } from "../database/prisma.js";
+import { Prisma } from "../generated/prisma/client.js";
 
 class RoomRepository {
   async findAll(limit: number = 0): Promise<Room[]> {
@@ -13,12 +14,18 @@ class RoomRepository {
     return await prisma.room.findUnique({ where: { name } });
   }
 
-  async findById(id: number): Promise<Room | null> {
-    return await prisma.room.findUnique({ where: { id } });
+  async findById(
+    id: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<Room | null> {
+    return await db.room.findUnique({ where: { id } });
   }
 
-  async create(room: Omit<Room, "id">): Promise<Room> {
-    return await prisma.room.create({ data: room });
+  async create(
+    room: Omit<Room, "id">,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<Room> {
+    return await db.room.create({ data: room });
   }
 
   async update(room: Room): Promise<Room> {

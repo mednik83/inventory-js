@@ -1,11 +1,13 @@
 import { prisma } from "../database/prisma.js";
+import type { Prisma } from "../generated/prisma/client.js";
 import { Operation } from "../types.js";
 
 class OperationRepository {
   async create(
     operation: Pick<Operation, "equipment_id" | "type" | "comment">,
+    db: Prisma.TransactionClient = prisma,
   ): Promise<Operation> {
-    return await prisma.operation.create({ data: operation });
+    return await db.operation.create({ data: operation });
   }
 
   async getByEquipmentId(equipmentId: number): Promise<Operation[]> {
@@ -15,8 +17,11 @@ class OperationRepository {
     });
   }
 
-  async deleteByEquipmentId(equipmentId: number): Promise<{ count: number }> {
-    return await prisma.operation.deleteMany({
+  async deleteByEquipmentId(
+    equipmentId: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<{ count: number }> {
+    return await db.operation.deleteMany({
       where: { equipment_id: equipmentId },
     });
   }
