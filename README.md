@@ -16,7 +16,9 @@ docker compose up --build
 
 Приложение: **http://localhost:8080**. Backend API напрямую: http://localhost:8010.
 
-База SQLite хранится в папке `db-data/` рядом с `docker-compose.yml` и переживает перезапуск контейнеров.
+Поднимаются три контейнера: `db` (PostgreSQL), `backend` и `frontend`. При старте backend сам применяет миграции и загружает демо-данные (3 комнаты и 3 единицы оборудования). Если в базе уже есть данные, демо-данные не загружаются повторно.
+
+База хранится в named volume Docker `db-data` и переживает `docker compose down` / `up`. `docker compose down -v` удаляет volume вместе со всеми данными.
 
 ---
 
@@ -48,7 +50,8 @@ docker compose up --build
 ## Стек
 
 **Frontend:** React 19, react-router 7, Vite 8, `@zxing/browser`
-**Backend:** Node 24, TypeScript 5.9, Express 5, SQLite (better-sqlite3), qrcode, uuid
+**Backend:** Node 24, TypeScript 5.9, Express 5, Zod 4, qrcode, uuid
+**База данных:** PostgreSQL 17, Prisma 7 (Prisma Client через `@prisma/adapter-pg`, Prisma Migrate)
 **Тесты и качество:** Mocha, Supertest, ESLint 10 (typescript-eslint)
 **Запуск:** Docker Compose, nginx
 
@@ -57,7 +60,7 @@ docker compose up --build
 ## Архитектура
 
 ```
-браузер ──► nginx (frontend) ──/api/──► backend (Express) ──► SQLite (volume)
+браузер ──► nginx (frontend) ──/api/──► backend (Express) ──► PostgreSQL (volume)
              └─ статика React
 ```
 
@@ -69,9 +72,9 @@ docker compose up --build
 
 - `routes` — маршруты API
 - `controllers` — HTTP: вызвать сервис, отдать ответ, ошибку передать в `next()`
-- `services` — бизнес-правила; вход из HTTP приходит как `unknown` и сужается валидаторами
-- `repositories` — SQL, только prepared statements
-- `errors` — `AppError` и наследники (400 / 404 / 409); наружу уходит только `{ "message" }`, без стека и текста SQLite
+- `services` — бизнес-правила и транзакции; вход из HTTP приходит как `unknown` и сужается Zod-схемами (`schemas/zod.ts`)
+- `repositories` — доступ к базе через Prisma Client; каждый метод принимает необязательный клиент транзакции `tx`
+- `errors` — `AppError` и наследники (400 / 404 / 409); `ZodError` превращается в 400; наружу уходит только `{ "message" }`, без стека и текста ошибок базы
 - `middlewares/error-handler.ts` — единая обработка ошибок, включая битый JSON
 
 ### Frontend
@@ -88,6 +91,8 @@ docker compose up --build
 - **В QR только uuid.** Не URL (наклейка не ломается при смене домена) и не данные (они устаревают, а наклейка нет).
 - **uuid — публичный идентификатор, id — внутренний.** uuid не принимается из тела запроса.
 - **Каждая мутация пишет запись в `operations`.** История — единственный источник «что и когда случилось»; отдельной таблицы перемещений нет.
+- **Мутация и запись в историю — одна транзакция.** Если запись в `operations` не удалась, изменение оборудования тоже откатывается: история не расходится с данными.
+- **Схема базы меняется только миграциями.** `prisma/schema.prisma` — источник правды, миграции лежат в `prisma/migrations` и применяются при старте контейнера (`prisma migrate deploy`).
 - **Списание необратимо.** Поставить или снять `written_off` через редактирование нельзя (400), повторное списание → 409.
 - **Ошибки отличаются по статусу, а не по тексту.** Фронт проверяет `err.status === 404`, а не строку сообщения.
 - **Один обработчик для всех способов ввода.** USB-сканер, ручной ввод и камера отдают строку в одну функцию.
@@ -96,29 +101,39 @@ docker compose up --build
 
 ## Разработка без Docker
 
-Требуется **Node.js 24** (зафиксирован в `.nvmrc` / `.node-version`). На Node 26 не собирается `better-sqlite3`.
+Требуется **Node.js 24** (зафиксирован в `backend/.nvmrc` / `backend/.node-version`) и PostgreSQL. Проще всего поднять только базу из `docker-compose.yml`, она слушает `localhost:5432`:
 
 ```bash
-fnm use            # или nvm use
+docker compose up -d db
 ```
 
 ### Backend
 
 ```bash
 cd backend
+fnm use                   # или nvm use
 npm install
-cp .env.example .env      # npm start читает --env-file=.env
+npm run db:generate       # сгенерировать Prisma Client в src/generated (Prisma 7 не делает это при install)
+cp .env.example .env      # DATABASE_URL; npm start читает --env-file=.env
+npx prisma migrate deploy # применить миграции
+npm run db:seed           # по желанию: демо-данные
 npm start                 # http://localhost:8010
 ```
 
+После изменения `prisma/schema.prisma`: `npx prisma migrate dev --name <имя>` создаёт и применяет новую миграцию.
+
 ### Тесты
 
-Тесты используют отдельную базу и свой env-файл:
+Тесты используют отдельную базу `inventory_test` в том же Postgres и свой env-файл. Перед каждым тестом таблицы очищаются (`TRUNCATE ... RESTART IDENTITY`). Базу нужно один раз создать и применить к ней миграции:
 
 ```bash
+docker compose exec db createdb -U user inventory_test
 cp .env.test.example .env.test
+DATABASE_URL="postgresql://user:password@localhost:5432/inventory_test" npx prisma migrate deploy
 npm test
 ```
+
+`docker compose down -v` удаляет и тестовую базу, после него эти шаги нужно повторить. Миграции к тестовой базе нужно применять и после каждой новой миграции.
 
 `.env` и `.env.test` в `.gitignore`, в репозитории только `*.example`.
 
