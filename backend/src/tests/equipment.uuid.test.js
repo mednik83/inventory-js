@@ -2,7 +2,6 @@ import request from "supertest";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { app } from "../app.js";
-import db from "../database/db.js";
 
 describe("Equipment UUID and QR API", () => {
   let roomId;
@@ -10,10 +9,6 @@ describe("Equipment UUID and QR API", () => {
   let equipmentUuid;
 
   beforeEach(async () => {
-    db.prepare("DELETE FROM operations").run();
-    db.prepare("DELETE FROM equipments").run();
-    db.prepare("DELETE FROM rooms").run();
-
     const roomRes = await request(app)
       .post("/rooms")
       .send({ name: "Room 101" })

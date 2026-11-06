@@ -28,7 +28,7 @@ export interface Operation {
   equipment_id: number;
   type: OperationType;
   comment: string | null;
-  created_at: string;
+  created_at: Date;
 }
 
 export interface Room {

@@ -20,5 +20,5 @@ export default tseslint.config(
       "@typescript-eslint/no-unsafe-argument": "error",
     },
   },
-  { ignores: ["dist/", "node_modules/", "**/*.js"] },
+  { ignores: ["dist/", "node_modules/", "**/*.js", "src/generated"] },
 );

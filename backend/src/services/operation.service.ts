@@ -2,29 +2,36 @@ import * as z from "zod";
 import { operationRepository } from "../repositories/operation.repository.js";
 import { IdZod, OperationZod } from "../schemas/zod.js";
 import { type Operation } from "../types.js";
+import { Prisma } from "../generated/prisma/client.js";
 
 class OperationService {
-  create(operation: {
-    equipment_id: number;
-    type: string;
-    comment?: string | null;
-  }) {
+  async create(
+    operation: {
+      equipment_id: number;
+      type: string;
+      comment?: string | null;
+    },
+    db?: Prisma.TransactionClient,
+  ) {
     const validOperation: z.infer<typeof OperationZod> = OperationZod.parse({
       type: operation.type,
       comment: operation.comment,
     });
     const validEquipmentId = IdZod.parse(operation.equipment_id);
-    return operationRepository.create({
-      equipment_id: validEquipmentId,
-      type: validOperation.type,
-      comment: validOperation.comment || null,
-    });
+    return await operationRepository.create(
+      {
+        equipment_id: validEquipmentId,
+        type: validOperation.type,
+        comment: validOperation.comment,
+      },
+      db,
+    );
   }
 
-  getByEquipmentId(equipmentId: unknown): Operation[] {
+  async getByEquipmentId(equipmentId: unknown): Promise<Operation[]> {
     const validEquipmentId: number = IdZod.parse(equipmentId);
     const operations: Operation[] =
-      operationRepository.getByEquipmentId(validEquipmentId);
+      await operationRepository.getByEquipmentId(validEquipmentId);
 
     return operations;
   }

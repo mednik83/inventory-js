@@ -1,15 +1,8 @@
 import request from "supertest";
 import assert from "node:assert/strict";
 import { app } from "../app.js";
-import db from "../database/db.js";
 
 describe("Room API", () => {
-  beforeEach(() => {
-    db.prepare("DELETE FROM operations").run();
-    db.prepare("DELETE FROM equipments").run();
-    db.prepare("DELETE FROM rooms").run();
-  });
-
   describe("Room API", () => {
     describe("GET /rooms", () => {
       it("should return rooms as json array", async () => {
@@ -105,7 +98,7 @@ describe("Room API", () => {
 
       it("should return 404 if room does not exist", async () => {
         await request(app)
-          .get("/rooms/9999999999")
+          .get("/rooms/999999")
           .expect("Content-Type", /json/)
           .expect(404);
       });
@@ -170,7 +163,7 @@ describe("Room API", () => {
 
       it("should return 404 if room does not exist on update", async () => {
         await request(app)
-          .put("/rooms/9999999999")
+          .put("/rooms/999999")
           .send({ name: "Ghost room" })
           .expect("Content-Type", /json/)
           .expect(404);
@@ -200,7 +193,7 @@ describe("Room API", () => {
 
       it("should return 404 if room does not exist on delete", async () => {
         await request(app)
-          .delete("/rooms/9999999999")
+          .delete("/rooms/999999")
           .expect("Content-Type", /json/)
           .expect(404);
       });

@@ -8,13 +8,13 @@ import { roomRepository } from "../repositories/room.repository.js";
 import { IdZod, RoomZod } from "../schemas/zod.js";
 
 class RoomService {
-  getAll() {
-    return roomRepository.findAll();
+  async getAll() {
+    return await roomRepository.findAll();
   }
-  getById(id: unknown) {
+  async getById(id: unknown) {
     const roomId = IdZod.parse(id);
 
-    const room = roomRepository.findById(roomId);
+    const room = await roomRepository.findById(roomId);
 
     if (!room) {
       throw new NotFoundError("Room not found");
@@ -23,49 +23,48 @@ class RoomService {
     return room;
   }
 
-  create(data: unknown) {
+  async create(data: unknown) {
     const validData = RoomZod.parse(data);
 
-    if (roomRepository.findByName(validData.name)) {
+    if (await roomRepository.findByName(validData.name)) {
       throw new ValidationError("The room must be unique");
     }
 
-    return roomRepository.create(validData);
+    return await roomRepository.create(validData);
   }
 
-  update(id: unknown, data: unknown) {
+  async update(id: unknown, data: unknown) {
     const roomId = IdZod.parse(id);
     const validData = RoomZod.parse(data);
 
-    const existing = roomRepository.findByName(validData.name);
+    const existing = await roomRepository.findByName(validData.name);
+
     if (existing && existing.id !== roomId) {
       throw new ValidationError("The room must be unique");
     }
+
+    await this.getById(roomId);
 
     const room = {
       id: roomId,
       ...validData,
     };
 
-    const result = roomRepository.update(room);
+    const roomUpdated = await roomRepository.update(room);
 
-    if (result.changes === 0) {
-      throw new NotFoundError("Room not found");
-    }
-
-    return room;
+    return roomUpdated;
   }
 
-  delete(id: unknown) {
+  async delete(id: unknown) {
     const roomId = IdZod.parse(id);
 
-    const room = roomRepository.findById(roomId);
+    const room = await roomRepository.findById(roomId);
 
     if (!room) {
       throw new NotFoundError("Room not found");
     }
 
-    const equipmentsCount = equipmentRepository.countByRoomId(roomId);
+    const equipmentsCount = await equipmentRepository.countByRoomId(roomId);
 
     if (equipmentsCount > 0) {
       throw new ConflictError(

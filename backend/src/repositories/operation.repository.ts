@@ -1,49 +1,29 @@
-import db from "../database/db.js";
+import { prisma } from "../database/prisma.js";
+import type { Prisma } from "../generated/prisma/client.js";
 import { Operation } from "../types.js";
 
 class OperationRepository {
-  create(operation: Pick<Operation, "equipment_id" | "type" | "comment">) {
-    if (!operation.comment) {
-      return db
-        .prepare(
-          `
-        INSERT INTO operations (equipment_id, type)
-        VALUES (?, ?)
-        `,
-        )
-        .run(operation.equipment_id, operation.type);
-    }
-    return db
-      .prepare(
-        `
-      INSERT INTO operations (equipment_id, type, comment)
-      VALUES (?, ?, ?)
-      `,
-      )
-      .run(operation.equipment_id, operation.type, operation.comment);
+  async create(
+    operation: Pick<Operation, "equipment_id" | "type" | "comment">,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<Operation> {
+    return await db.operation.create({ data: operation });
   }
 
-  getByEquipmentId(equipmentId: number): Operation[] {
-    return db
-      .prepare(
-        `
-      SELECT * FROM operations
-      WHERE equipment_id = ?
-      ORDER BY created_at DESC, id DESC
-      `,
-      )
-      .all(equipmentId) as Operation[];
+  async getByEquipmentId(equipmentId: number): Promise<Operation[]> {
+    return await prisma.operation.findMany({
+      where: { equipment_id: equipmentId },
+      orderBy: [{ created_at: "desc" }, { id: "desc" }],
+    });
   }
 
-  deleteByEquipmentId(equipmentId: number) {
-    return db
-      .prepare(
-        `
-      DELETE FROM operations
-      WHERE equipment_id = ?
-      `,
-      )
-      .run(equipmentId);
+  async deleteByEquipmentId(
+    equipmentId: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<{ count: number }> {
+    return await db.operation.deleteMany({
+      where: { equipment_id: equipmentId },
+    });
   }
 }
 

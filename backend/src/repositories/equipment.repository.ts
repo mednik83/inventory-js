@@ -3,144 +3,145 @@ import type {
   EquipmentFilters,
   EquipmentWithRoom,
 } from "../types.ts";
-import db from "../database/db.js";
+import { prisma } from "../database/prisma.js";
+import { Prisma } from "../generated/prisma/client.js";
 
 class EquipmentRepository {
-  create(equipment: Omit<Equipment, "id">): EquipmentWithRoom | undefined {
-    const result = db
-      .prepare(
-        `
-      INSERT INTO equipments (uuid, name, room_id, status)
-      VALUES (?, ?, ?, ?)
-    `,
-      )
-      .run(equipment.uuid, equipment.name, equipment.room_id, equipment.status);
-
-    return this.findById(Number(result.lastInsertRowid));
+  private toEquipmentWithRoom(
+    data: Equipment & { room: { name: string } },
+  ): EquipmentWithRoom {
+    return {
+      id: data.id,
+      name: data.name,
+      uuid: data.uuid,
+      room_id: data.room_id,
+      status: data.status,
+      room_name: data.room.name,
+    };
   }
 
-  findByUuid(uuid: string): EquipmentWithRoom | undefined {
-    return db
-      .prepare(
-        `
-      SELECT
-        equipments.id,
-        equipments.uuid,
-        equipments.name,
-        equipments.room_id,
-        rooms.name AS room_name,
-        equipments.status
-      FROM equipments
-      JOIN rooms ON rooms.id = equipments.room_id
-      WHERE equipments.uuid = ?
-      `,
-      )
-      .get(uuid) as EquipmentWithRoom | undefined;
+  private withRoomName = { room: { select: { name: true } } } as const;
+
+  async create(
+    equipment: Omit<Equipment, "id">,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom | null> {
+    const result = await db.equipment.create({ data: equipment });
+
+    return this.findById(Number(result.id), db);
   }
 
-  findById(id: number): EquipmentWithRoom | undefined {
-    return db
-      .prepare(
-        `
-      SELECT
-        equipments.id,
-        equipments.uuid,
-        equipments.name,
-        equipments.room_id,
-        rooms.name AS room_name,
-        equipments.status
-      FROM equipments
-      JOIN rooms ON rooms.id = equipments.room_id
-      WHERE equipments.id = ?
-      `,
-      )
-      .get(id) as EquipmentWithRoom | undefined;
-  }
+  async findByUuid(uuid: string): Promise<EquipmentWithRoom | null> {
+    const rows = await prisma.equipment.findUnique({
+      where: {
+        uuid,
+      },
+      include: this.withRoomName,
+    });
 
-  findAll(filters: EquipmentFilters = {}): EquipmentWithRoom[] {
-    let sql = `
-      SELECT
-        equipments.id,
-        equipments.uuid,
-        equipments.name,
-        equipments.room_id,
-        rooms.name AS room_name,
-        equipments.status
-      FROM equipments
-      JOIN rooms ON rooms.id = equipments.room_id
-    `;
-
-    const conditions: string[] = [];
-    const params: (string | number)[] = [];
-
-    if (filters.roomIds?.length) {
-      const placeholders = filters.roomIds.map(() => "?").join(", ");
-      conditions.push(`room_id IN (${placeholders})`);
-      params.push(...filters.roomIds);
+    if (!rows) {
+      return null;
     }
 
-    if (filters.status) {
-      conditions.push("status = ?");
-      params.push(filters.status);
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
+
+    return result;
+  }
+
+  async findById(
+    id: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom | null> {
+    const rows = await db.equipment.findUnique({
+      where: { id: id },
+      include: this.withRoomName,
+    });
+
+    if (!rows) {
+      return null;
     }
 
-    if (conditions.length > 0) {
-      sql += " WHERE " + conditions.join(" AND ");
-    }
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
 
-    if (filters.limit) {
-      sql += " LIMIT ?";
-      params.push(filters.limit);
-    }
-
-    return db.prepare(sql).all(...params) as EquipmentWithRoom[];
+    return result;
   }
 
-  update(equipment: Omit<Equipment, "uuid">): number {
-    const result = db
-      .prepare(
-        `
-      UPDATE equipments
-      SET name = ?, room_id = ?, status = ?
-      WHERE id = ?
-      `,
-      )
-      .run(equipment.name, equipment.room_id, equipment.status, equipment.id);
+  async findAll(filters: EquipmentFilters = {}): Promise<EquipmentWithRoom[]> {
+    const rows = await prisma.equipment.findMany({
+      where: {
+        room_id: { in: filters.roomIds },
+        status: filters.status,
+      },
+      take: filters.limit,
+      include: this.withRoomName,
+      orderBy: { id: "asc" },
+    });
 
-    return result.changes;
+    const result: EquipmentWithRoom[] = rows.map((row) => {
+      return this.toEquipmentWithRoom(row);
+    });
+
+    return result;
   }
 
-  updateRoom(id: number, roomId: number): number {
-    const result = db
-      .prepare(
-        `
-      UPDATE equipments
-      SET room_id = ?
-      WHERE id = ?
-      `,
-      )
-      .run(roomId, id);
+  async update(
+    equipment: Omit<Equipment, "uuid">,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom> {
+    const rows = await db.equipment.update({
+      where: { id: equipment.id },
+      data: {
+        name: equipment.name,
+        room_id: equipment.room_id,
+        status: equipment.status,
+      },
+      include: this.withRoomName,
+    });
 
-    return result.changes;
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
+
+    return result;
   }
 
-  countByRoomId(roomId: number): number {
-    const row = db
-      .prepare(`SELECT COUNT(*) AS count FROM equipments WHERE room_id = ?`)
-      .get(roomId) as { count: number };
+  async updateRoom(
+    id: number,
+    roomId: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom> {
+    const rows = await db.equipment.update({
+      where: { id: id },
+      data: {
+        room_id: roomId,
+      },
+      include: this.withRoomName,
+    });
 
-    return row.count;
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
+
+    return result;
   }
 
-  deleteById(id: number): number {
-    return db
-      .prepare(
-        `
-      DELETE FROM equipments
-      WHERE id = ?
-      `,
-      )
-      .run(id).changes;
+  async countByRoomId(roomId: number): Promise<number> {
+    const total = await prisma.equipment.count({
+      where: { room_id: roomId },
+    });
+
+    return total;
+  }
+
+  async deleteById(
+    id: number,
+    db: Prisma.TransactionClient = prisma,
+  ): Promise<EquipmentWithRoom> {
+    const rows = await db.equipment.delete({
+      where: {
+        id: id,
+      },
+      include: this.withRoomName,
+    });
+
+    const result: EquipmentWithRoom = this.toEquipmentWithRoom(rows);
+    return result;
   }
 }
 

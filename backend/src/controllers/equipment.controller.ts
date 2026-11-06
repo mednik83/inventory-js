@@ -1,106 +1,61 @@
 import { equipmentService } from "../services/equipment.service.js";
 import { qrCodeService } from "../services/qr-code.service.js";
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
 import type { EquipmentWithRoom } from "../types.js";
 import { UuidZod } from "../schemas/zod.js";
 
 class EquipmentController {
-  getById(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const equipment = equipmentService.getById(req.params.id);
-      res.json(equipment);
-    } catch (error) {
-      next(error);
-    }
+  async getById(req: Request, res: Response): Promise<void> {
+    const equipment = await equipmentService.getById(req.params.id);
+    res.json(equipment);
   }
 
-  getByUuid(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const equipment = equipmentService.getByUuid(req.params.uuid);
-      res.json(equipment);
-    } catch (error) {
-      next(error);
-    }
+  async getByUuid(req: Request, res: Response): Promise<void> {
+    const equipment = await equipmentService.getByUuid(req.params.uuid);
+    res.json(equipment);
   }
 
-  getAll(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const filters: unknown = req.query;
-      const equipments = equipmentService.getAll(filters);
-      res.json(equipments);
-    } catch (error) {
-      next(error);
-    }
+  async getAll(req: Request, res: Response): Promise<void> {
+    const filters: unknown = req.query;
+    const equipments = await equipmentService.getAll(filters);
+    res.json(equipments);
   }
 
-  create(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const equipment = equipmentService.create(req.body);
-      res.status(201).json(equipment);
-    } catch (error) {
-      next(error);
-    }
+  async create(req: Request, res: Response): Promise<void> {
+    const equipment = await equipmentService.create(req.body);
+    res.status(201).json(equipment);
   }
 
-  update(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const equipment = equipmentService.update(req.params.id, req.body);
-
-      res.status(200).json(equipment);
-    } catch (error) {
-      next(error);
-    }
+  async update(req: Request, res: Response): Promise<void> {
+    const equipment = await equipmentService.update(req.params.id, req.body);
+    res.status(200).json(equipment);
   }
 
-  move(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const equipment = equipmentService.move(req.params.id, req.body);
-
-      res.status(200).json(equipment);
-    } catch (error) {
-      next(error);
-    }
+  async move(req: Request, res: Response): Promise<void> {
+    const equipment = await equipmentService.move(req.params.id, req.body);
+    res.status(200).json(equipment);
   }
 
-  writeOff(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const equipment: EquipmentWithRoom = equipmentService.writeOff(
-        req.params.id,
-      );
-
-      res.status(200).json(equipment);
-    } catch (error) {
-      next(error);
-    }
+  async writeOff(req: Request, res: Response): Promise<void> {
+    const equipment: EquipmentWithRoom = await equipmentService.writeOff(
+      req.params.id,
+    );
+    res.status(200).json(equipment);
   }
 
-  forceDelete(req: Request, res: Response, next: NextFunction): void {
-    try {
-      equipmentService.forceDelete(req.params.id);
-
-      res.status(204).send();
-    } catch (error) {
-      next(error);
-    }
+  async forceDelete(req: Request, res: Response): Promise<void> {
+    await equipmentService.forceDelete(req.params.id);
+    res.status(204).send();
   }
 
-  getQrByUuid(req: Request, res: Response, next: NextFunction): void {
-    try {
-      const { uuid } = req.params;
+  async getQrByUuid(req: Request, res: Response): Promise<void> {
+    const validUuid = UuidZod.parse(req.params.uuid);
 
-      const validUuid = UuidZod.parse(uuid);
-      const equipment = equipmentService.getByUuid(validUuid);
+    const equipment = await equipmentService.getByUuid(validUuid);
 
-      qrCodeService
-        .generateSvg(equipment.uuid)
-        .then((qrSvg) => {
-          res.type("image/svg+xml");
-          res.send(qrSvg);
-        })
-        .catch(next);
-    } catch (error) {
-      next(error);
-    }
+    const qrSvg = await qrCodeService.generateSvg(equipment.uuid);
+
+    res.type("image/svg+xml").send(qrSvg);
   }
 }
 
